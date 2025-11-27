@@ -26,3 +26,8 @@ A referência a seguir cobre:
 ## `src.api.endpoints.health`
 
 ::: src.api.endpoints.health
+
+
+## `src.core.database`
+
+::: src.core.database
