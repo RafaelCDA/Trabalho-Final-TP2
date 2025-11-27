@@ -1,51 +1,57 @@
 """
-# Modelo de Usuário
+Modelo ORM responsável pelo mapeamento da tabela de usuários.
 
-Representa a entidade de usuário armazenada no banco de dados.
-O modelo utiliza UUID v4 como identificador e contém os atributos
-necessários para identificação e autenticação simples.
+Contém os atributos essenciais para identificação e autenticação, incluindo
+nome, e-mail, senha, tipo de usuário e registros de criação e atualização.
+O identificador é gerado automaticamente no formato UUID v4.
 """
 
 import uuid
-from sqlalchemy import Column, String
+from datetime import datetime, timezone
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Enum
 from src.core.database import Base
 
 
 class User(Base):
-    """
-    Modelo ORM responsável pelo mapeamento da tabela de usuários.
-
-    ## Campos
-    - **id** (*str*): Identificador único em formato UUID v4.
-    - **name** (*str*): Nome do usuário.
-    - **email** (*str*): Endereço de e-mail único no sistema.
-    - **password** (*str*): Senha armazenada em texto simples.
-
-    ## Comportamento
-    - O `id` é gerado automaticamente no momento da criação da instância.
-    - Este modelo é compatível com o SQLAlchemy em ambiente síncrono.
-    """
-
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
+    id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
 
-    def __init__(self, name: str, email: str, password: str):
+    type: Mapped[str] = mapped_column(
+        Enum("user", "admin", "supplier", name="user_type"),
+        nullable=False,
+        default="user",
+    )
+
+    created_at: Mapped[str] = mapped_column(String, nullable=False)
+    updated_at: Mapped[str] = mapped_column(String, nullable=False)
+
+    def __init__(self, name: str, email: str, password: str, type: str = "user"):
         """
-        Inicializa a entidade de usuário com os valores fornecidos.
+        Inicializa a entidade de usuário.
 
-        ## Parâmetros
-        - **name** (*str*): Nome completo do usuário.
-        - **email** (*str*): Endereço de e-mail.
-        - **password** (*str*): Senha em texto simples.
+        ### Parâmetros
+        - **name** (`str`): Nome do usuário.
+        - **email** (`str`): E-mail do usuário.
+        - **password** (`str`): Senha do usuário.
+        - **type** (`str`): Tipo do usuário (`user`, `admin`, `supplier`).
 
-        ## Nota
-        O identificador é gerado automaticamente no formato UUID v4.
+        ### Retorno
+        - Nenhum. A instância é criada com UUID e timestamps automáticos.
         """
+        if type not in ("user", "admin", "supplier"):
+            raise ValueError("Invalid user type.")
+
+        now = datetime.now(timezone.utc).isoformat()
+
         self.id = str(uuid.uuid4())
         self.name = name
         self.email = email
         self.password = password
+        self.type = type
+        self.created_at = now
+        self.updated_at = now
