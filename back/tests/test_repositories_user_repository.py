@@ -13,6 +13,7 @@ from src.repositories.user_repository import UserRepository
 # CREATE
 # --------------------------------------------------------------------
 
+
 def test_create_user(test_db):
     repo = UserRepository(test_db)
 
@@ -30,6 +31,7 @@ def test_create_user(test_db):
 # --------------------------------------------------------------------
 # READ
 # --------------------------------------------------------------------
+
 
 def test_get_user_by_id(test_db):
     repo = UserRepository(test_db)
@@ -68,15 +70,14 @@ def test_get_all_users(test_db):
 # UPDATE
 # --------------------------------------------------------------------
 
+
 def test_update_user(test_db):
     repo = UserRepository(test_db)
 
     user = repo.create_user("Carlos", "carlos@test.com", "abc")
 
     atualizado = repo.update_user(
-        user_id=getattr(user, "id"),
-        name="Carlos Silva",
-        email="carlos.silva@test.com"
+        user_id=getattr(user, "id"), name="Carlos Silva", email="carlos.silva@test.com"
     )
 
     assert isinstance(atualizado, User)
@@ -87,6 +88,7 @@ def test_update_user(test_db):
 # --------------------------------------------------------------------
 # DELETE
 # --------------------------------------------------------------------
+
 
 def test_delete_user(test_db):
     repo = UserRepository(test_db)
