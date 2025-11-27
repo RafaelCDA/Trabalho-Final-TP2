@@ -13,3 +13,5 @@ plugins:
 nav:
   - Início: index.md
   - API: api.md
+  - Modelos: models.md
+  - CORE: core.md

@@ -1,20 +1,9 @@
 """
 # Modelo de Usuário
 
-Representa a entidade de usuário persistida no banco de dados. Este modelo
-define os atributos essenciais para identificação e autenticação simples.
-
-## Parâmetros
-- **name** (*str*): Nome do usuário.
-- **email** (*str*): Endereço de e-mail.
-- **password** (*str*): Senha em texto simples.
-
-## Retorno
-Uma instância da classe `User`, com os dados informados e o identificador
-gerado automaticamente.
-
-## Observações
-- O identificador utiliza o formato UUID v4 e é armazenado como string.
+Representa a entidade de usuário armazenada no banco de dados.
+O modelo utiliza UUID v4 como identificador e contém os atributos
+necessários para identificação e autenticação simples.
 """
 
 import uuid
@@ -24,13 +13,17 @@ from src.core.database import Base
 
 class User(Base):
     """
-    Modelo ORM da entidade de usuário.
+    Modelo ORM responsável pelo mapeamento da tabela de usuários.
 
     ## Campos
-    - **id**: Identificador único (UUID v4).
-    - **name**: Nome do usuário.
-    - **email**: E-mail único.
-    - **password**: Senha armazenada em texto simples.
+    - **id** (*str*): Identificador único em formato UUID v4.
+    - **name** (*str*): Nome do usuário.
+    - **email** (*str*): Endereço de e-mail único no sistema.
+    - **password** (*str*): Senha armazenada em texto simples.
+
+    ## Comportamento
+    - O `id` é gerado automaticamente no momento da criação da instância.
+    - Este modelo é compatível com o SQLAlchemy em ambiente síncrono.
     """
 
     __tablename__ = "users"
@@ -42,13 +35,15 @@ class User(Base):
 
     def __init__(self, name: str, email: str, password: str):
         """
+        Inicializa a entidade de usuário com os valores fornecidos.
+
         ## Parâmetros
         - **name** (*str*): Nome completo do usuário.
-        - **email** (*str*): Endereço de e-mail do usuário.
-        - **password** (*str*): Senha utilizada no processo de autenticação.
+        - **email** (*str*): Endereço de e-mail.
+        - **password** (*str*): Senha em texto simples.
 
-        ## Retorno
-        Instância da classe `User` com o identificador gerado automaticamente.
+        ## Nota
+        O identificador é gerado automaticamente no formato UUID v4.
         """
         self.id = str(uuid.uuid4())
         self.name = name
