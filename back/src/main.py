@@ -10,6 +10,10 @@ usuários, conforme definido nos requisitos funcionais.
 
 from fastapi import FastAPI
 from src.api.router import router as api_router
+from src.core.database import Base, engine
+
+# Criação das tabelas do banco no momento de inicialização
+Base.metadata.create_all(bind=engine)
 
 # Instância principal da aplicação
 app = FastAPI(
