@@ -10,6 +10,7 @@ usuários, conforme definido nos requisitos funcionais.
 
 from fastapi import FastAPI
 from src.api.router import router as api_router
+from api.services.produto_busca_service import ProdutoBuscaService 
 
 # Instância principal da aplicação
 app = FastAPI(
@@ -22,4 +23,5 @@ app = FastAPI(
 )
 
 # Registro das rotas da aplicação
-app.include_router(api_router)
+app.include_router(router)
+
