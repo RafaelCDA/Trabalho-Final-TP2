@@ -8,6 +8,7 @@
 - Sávio Henrique
 - Gabriel
 - Guilherme
+- Henrique
 
 ## Tecnologias:
 - Python
