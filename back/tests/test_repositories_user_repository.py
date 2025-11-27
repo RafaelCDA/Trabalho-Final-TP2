@@ -18,7 +18,7 @@ def test_create_user(test_db):
     repo = UserRepository(test_db)
 
     user = repo.create_user(
-        name="Guilherme", email="guilherme@test.com", password="123"
+        name="Guilherme", email="guilherme@test.com", password="123", type="user"
     )
 
     assert isinstance(user, User)
@@ -26,6 +26,31 @@ def test_create_user(test_db):
     uuid.UUID(getattr(user, "id"), version=4)
     assert getattr(user, "name") == "Guilherme"
     assert getattr(user, "email") == "guilherme@test.com"
+    assert getattr(user, "type") == "user"
+    assert getattr(user, "created_at") is not None
+    assert getattr(user, "updated_at") is not None
+
+
+def test_create_user_com_tipo_admin(test_db):
+    repo = UserRepository(test_db)
+
+    user = repo.create_user(
+        name="Admin", email="admin@test.com", password="abc", type="admin"
+    )
+
+    assert isinstance(user, User)
+    assert getattr(user, "type") == "admin"
+
+
+def test_create_user_com_tipo_supplier(test_db):
+    repo = UserRepository(test_db)
+
+    user = repo.create_user(
+        name="Fornecedor", email="for@test.com", password="abc", type="supplier"
+    )
+
+    assert isinstance(user, User)
+    assert getattr(user, "type") == "supplier"
 
 
 # --------------------------------------------------------------------
@@ -76,13 +101,29 @@ def test_update_user(test_db):
 
     user = repo.create_user("Carlos", "carlos@test.com", "abc")
 
+    antigo_updated_at = getattr(user, "updated_at")
+
     atualizado = repo.update_user(
-        user_id=getattr(user, "id"), name="Carlos Silva", email="carlos.silva@test.com"
+        user_id=getattr(user, "id"),
+        name="Carlos Silva",
+        email="carlos.silva@test.com",
+        type="admin",
     )
 
     assert isinstance(atualizado, User)
     assert getattr(atualizado, "name") == "Carlos Silva"
     assert getattr(atualizado, "email") == "carlos.silva@test.com"
+    assert getattr(atualizado, "type") == "admin"
+
+    # updated_at deve ter sido modificado
+    assert getattr(atualizado, "updated_at") != antigo_updated_at
+
+
+def test_update_user_inexistente(test_db):
+    repo = UserRepository(test_db)
+
+    resultado = repo.update_user("id_invalido", name="Teste")
+    assert resultado is None
 
 
 # --------------------------------------------------------------------
@@ -99,3 +140,9 @@ def test_delete_user(test_db):
 
     encontrado = repo.get_by_id(getattr(user, "id"))
     assert encontrado is None
+
+
+def test_delete_user_inexistente(test_db):
+    repo = UserRepository(test_db)
+
+    repo.delete_user("id_que_nao_existe")

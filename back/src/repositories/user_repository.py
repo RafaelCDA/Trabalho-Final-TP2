@@ -2,12 +2,12 @@
 Repositório de Usuários
 
 Centraliza as operações de acesso e manipulação da entidade User na base
-de dados. Este módulo serve como intermediário entre o modelo ORM e a
-camada de serviços, garantindo um ponto único para operações de
-persistência.
+de dados, servindo como intermediário entre o modelo ORM e a camada de
+serviços.
 """
 
 from typing import Optional, List
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from src.models.user import User
 
@@ -19,14 +19,16 @@ class UserRepository:
     Parâmetros
     ----------
     db : Session
-        Sessão ativa utilizada para executar comandos SQL e transações.
+        Sessão ativa utilizada para operações de persistência.
     """
 
     def __init__(self, db: Session):
         self.db = db
 
     # CREATE
-    def create_user(self, name: str, email: str, password: str) -> User:
+    def create_user(
+        self, name: str, email: str, password: str, type: str = "user"
+    ) -> User:
         """
         Registra um novo usuário no banco de dados.
 
@@ -35,16 +37,18 @@ class UserRepository:
         name : str
             Nome completo do usuário.
         email : str
-            Endereço de e-mail, utilizado como identificador único.
+            Endereço de e-mail.
         password : str
-            Senha associada ao usuário.
+            Senha associada.
+        type : str
+            Tipo do usuário (`user`, `admin`, `supplier`).
 
         Retorno
         -------
         User
-            Instância persistida contendo o identificador e os dados enviados.
+            Instância persistida com identificador gerado.
         """
-        user = User(name=name, email=email, password=password)
+        user = User(name=name, email=email, password=password, type=type)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
@@ -53,23 +57,23 @@ class UserRepository:
     # READ
     def get_by_id(self, user_id: str) -> Optional[User]:
         """
-        Consulta um usuário pelo identificador único.
+        Consulta um usuário pelo identificador.
 
         Parâmetros
         ----------
         user_id : str
-            Identificador do usuário (UUID v4).
+            Identificador único.
 
         Retorno
         -------
         User ou None
-            Instância correspondente ou None caso o registro não exista.
+            Registro encontrado ou None.
         """
         return self.db.query(User).filter_by(id=user_id).first()
 
     def get_by_email(self, email: str) -> Optional[User]:
         """
-        Consulta um usuário pelo endereço de e-mail.
+        Consulta um usuário pelo e-mail.
 
         Parâmetros
         ----------
@@ -79,7 +83,7 @@ class UserRepository:
         Retorno
         -------
         User ou None
-            Instância encontrada ou None se não houver correspondência.
+            Registro correspondente ou None.
         """
         return self.db.query(User).filter_by(email=email).first()
 
@@ -90,26 +94,26 @@ class UserRepository:
         Retorno
         -------
         list[User]
-            Lista contendo todas as instâncias persistidas.
+            Lista com todos os registros persistidos.
         """
         return self.db.query(User).all()
 
     # UPDATE
     def update_user(self, user_id: str, **fields) -> Optional[User]:
         """
-        Atualiza os campos enviados para o usuário especificado.
+        Atualiza os campos informados do usuário especificado.
 
         Parâmetros
         ----------
         user_id : str
-            Identificador do usuário a ser atualizado.
+            Identificador do usuário.
         fields : dict
-            Conjunto chave-valor com os campos a serem modificados.
+            Campos a serem atualizados.
 
         Retorno
         -------
         User ou None
-            Instância atualizada ou None caso o registro não exista.
+            Instância atualizada ou None se o registro não existir.
         """
         user = self.get_by_id(user_id)
         if not user:
@@ -119,6 +123,8 @@ class UserRepository:
             if hasattr(user, key) and value is not None:
                 setattr(user, key, value)
 
+        user.updated_at = datetime.now(timezone.utc).isoformat()
+
         self.db.commit()
         self.db.refresh(user)
         return user
@@ -126,17 +132,17 @@ class UserRepository:
     # DELETE
     def delete_user(self, user_id: str) -> None:
         """
-        Remove o usuário correspondente ao ID informado.
+        Remove o usuário correspondente ao identificador.
 
         Parâmetros
         ----------
         user_id : str
-            Identificador do registro a ser removido.
+            Identificador do usuário.
 
         Retorno
         -------
         None
-            Não há retorno. Caso o usuário não exista, nenhuma operação é executada.
+            Não há retorno.
         """
         user = self.get_by_id(user_id)
         if not user:
