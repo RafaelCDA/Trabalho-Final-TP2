@@ -19,6 +19,7 @@ from src.dto.user_dto import (
 # CREATE
 # ---------------------------------------------------------
 
+
 def test_service_create_user(test_db):
     repo = UserRepository(test_db)
     service = UserService(repo)
@@ -56,6 +57,7 @@ def test_service_create_user_email_duplicado(test_db):
 # READ
 # ---------------------------------------------------------
 
+
 def test_service_get_user(test_db):
     repo = UserRepository(test_db)
     service = UserService(repo)
@@ -82,6 +84,7 @@ def test_service_get_user_inexistente(test_db):
 # LIST
 # ---------------------------------------------------------
 
+
 def test_service_list_users(test_db):
     repo = UserRepository(test_db)
     service = UserService(repo)
@@ -100,6 +103,7 @@ def test_service_list_users(test_db):
 # UPDATE
 # ---------------------------------------------------------
 
+
 def test_service_update_user(test_db):
     repo = UserRepository(test_db)
     service = UserService(repo)
@@ -108,10 +112,7 @@ def test_service_update_user(test_db):
         UserCreateDTO(name="Carlos", email="c@test.com", password="abc")
     )
 
-    updated = service.update_user(
-        created.id,
-        UserUpdateDTO(name="Carlos Silva")
-    )
+    updated = service.update_user(created.id, UserUpdateDTO(name="Carlos Silva"))
 
     assert isinstance(updated, UserResponseDTO)
     assert updated.name == "Carlos Silva"
@@ -128,6 +129,7 @@ def test_service_update_user_inexistente(test_db):
 # ---------------------------------------------------------
 # DELETE
 # ---------------------------------------------------------
+
 
 def test_service_delete_user(test_db):
     repo = UserRepository(test_db)
