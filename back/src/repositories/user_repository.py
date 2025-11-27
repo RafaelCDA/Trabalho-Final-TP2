@@ -1,65 +1,108 @@
 """
 Repositório de Usuários
 
-Define a interface de acesso aos dados da entidade User. Este módulo
-centraliza as operações de criação, consulta, atualização e remoção
-de usuários.
+Implementa as operações CRUD utilizadas pela aplicação para gerenciar
+instâncias da entidade User. Atua como camada intermediária entre o
+modelo ORM e a lógica de serviços.
 """
 
+from typing import Optional, List
+from sqlalchemy.orm import Session
 from src.models.user import User
 
 
 class UserRepository:
     """
-    Repositório responsável pelas operações CRUD da entidade User.
+    Repositório responsável pelas operações de persistência da entidade User.
 
-    Os métodos definidos aqui representam a interface de comunicação
-    com o banco de dados utilizada pelas camadas superiores.
+    Parâmetros
+    ----------
+    db : Session
+        Sessão ativa do SQLAlchemy utilizada para executar operações no banco.
     """
 
-    def __init__(self, db):
-        """
-        Inicializa o repositório com a sessão de banco fornecida.
-
-        Parâmetros
-        ----------
-        db : Session
-            Sessão ativa do SQLAlchemy utilizada para operações de persistência.
-        """
+    def __init__(self, db: Session):
         self.db = db
 
+    # ---------------------------------------------------------
+    # CREATE
+    # ---------------------------------------------------------
     def create_user(self, name: str, email: str, password: str) -> User:
         """
-        Cria um novo usuário no banco de dados.
-        """
-        raise NotImplementedError
+        Cria e persiste um novo usuário no banco de dados.
 
-    def get_by_id(self, user_id: str) -> User:
+        Retorno
+        -------
+        User
+            Instância persistida contendo identificador e dados informados.
         """
-        Retorna um usuário correspondente ao ID informado.
-        """
-        raise NotImplementedError
+        user = User(name=name, email=email, password=password)
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
-    def get_by_email(self, email: str) -> User:
+    # ---------------------------------------------------------
+    # READ
+    # ---------------------------------------------------------
+    def get_by_id(self, user_id: str) -> Optional[User]:
         """
-        Retorna um usuário correspondente ao e-mail informado.
+        Retorna o usuário correspondente ao ID informado, caso exista.
         """
-        raise NotImplementedError
+        return self.db.query(User).filter(User.id == user_id).first()
 
-    def get_all(self) -> list[User]:
+    def get_by_email(self, email: str) -> Optional[User]:
+        """
+        Retorna o usuário correspondente ao e-mail informado, caso exista.
+        """
+        return self.db.query(User).filter(User.email == email).first()
+
+    def get_all(self) -> List[User]:
         """
         Retorna a lista completa de usuários cadastrados.
         """
-        raise NotImplementedError
+        return self.db.query(User).all()
 
-    def update_user(self, user_id: str, **kwargs) -> User:
+    # ---------------------------------------------------------
+    # UPDATE
+    # ---------------------------------------------------------
+    def update_user(self, user_id: str, **kwargs) -> Optional[User]:
         """
-        Atualiza os campos fornecidos para o usuário especificado.
-        """
-        raise NotImplementedError
+        Atualiza campos específicos do usuário informado.
 
+        Parâmetros
+        ----------
+        user_id : str
+            Identificador do usuário.
+        kwargs : dict
+            Campos a serem atualizados.
+
+        Retorno
+        -------
+        User ou None
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+
+        for campo, valor in kwargs.items():
+            if hasattr(user, campo) and valor is not None:
+                setattr(user, campo, valor)
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    # ---------------------------------------------------------
+    # DELETE
+    # ---------------------------------------------------------
     def delete_user(self, user_id: str) -> None:
         """
         Remove o usuário associado ao ID informado.
         """
-        raise NotImplementedError
+        user = self.get_by_id(user_id)
+        if not user:
+            return
+
+        self.db.delete(user)
+        self.db.commit()
