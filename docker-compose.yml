@@ -1,0 +1,22 @@
+services:
+  # Frontend Next.js Container
+  front:
+    build:
+      context: .
+      dockerfile: ./front/Dockerfile
+    volumes: 
+    - "./front/:/var/www"
+    - /var/www/node_modules
+    ports:
+    - "3000:3000"
+    environment:
+    - NODE_ENV=development
+
+  back:
+    build:
+      context: .
+      dockerfile: ./back/Dockerfile
+    volumes:
+    - "./back/:/var/www"
+    ports:
+    - "80:80"
