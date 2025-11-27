@@ -1,0 +1,42 @@
+# Ambiente virtual
+.venv/
+
+# Compilados Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuração de IDEs/editor
+.vscode/
+.idea/
+
+# Caches de ferramentas
+.mypy_cache/
+.ruff_cache/
+.pyright/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Distribuição / builds
+build/
+dist/
+*.egg-info/
+
+# MkDocs
+site/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Ambiente local de dotenv
+.env
+.env.*

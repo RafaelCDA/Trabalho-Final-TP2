@@ -1,0 +1,15 @@
+site_name: Documentação do Sistema de Compras em Feiras
+theme:
+  name: material
+  language: pt-BR
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+
+nav:
+  - Início: index.md
+  - API: api.md
