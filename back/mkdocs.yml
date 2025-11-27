@@ -15,4 +15,5 @@ nav:
   - API: api.md
   - Modelos: models.md
   - Repositórios: repositories.md
+  - DTOs: dto.md
   - CORE: core.md
