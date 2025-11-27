@@ -22,13 +22,9 @@ def test_user_model_criacao_instancia():
     - O campo `id` deve ser gerado automaticamente no formato UUID.
     """
 
-    user = User(
-        name="Guilherme",
-        email="guilherme@test.com",
-        password="123"
-    )
+    user = User(name="Guilherme", email="guilherme@test.com", password="123")
 
-    assert user.name == "Guilherme"
-    assert user.email == "gui@example.com"
-    assert user.password == "123"
+    assert getattr(user, "name") == "Guilherme"
+    assert getattr(user, "email") == "guilherme@test.com"
+    assert getattr(user, "password") == "123"
     assert user.id is not None
