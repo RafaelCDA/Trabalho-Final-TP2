@@ -5,6 +5,7 @@ Este teste garante que o engine e a sessão sejam criados corretamente.
 """
 
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from src.core.database import engine, SessionLocal
 
 
@@ -30,14 +31,16 @@ def test_sessao_deve_criar_conexao():
     """
 
     db = SessionLocal()
+    try:
+        assert isinstance(db, Session)
 
-    assert isinstance(db, Session)
+        # Execução simples para validar comunicação com o banco
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT 1"))
+            row = result.fetchone()
 
-    # Tentativa de operação simples (ping no banco)
-    conn = engine.connect()
-    result = conn.execute("SELECT 1")
+            assert row is not None
+            assert row[0] == 1
 
-    assert result.fetchone()[0] == 1
-
-    conn.close()
-    db.close()
+    finally:
+        db.close()
