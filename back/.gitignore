@@ -40,3 +40,6 @@ site/
 # Ambiente local de dotenv
 .env
 .env.*
+
+# Banco de dados
+*.db
