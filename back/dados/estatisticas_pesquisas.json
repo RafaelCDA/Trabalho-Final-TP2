@@ -8,6 +8,15 @@
         "long": -47.876
       },
       "resultados_encontrados": 2
+    },
+    {
+      "termo": "teste",
+      "data_hora": "2025-11-27T17:18:26.776549",
+      "localizacao_usuario": {
+        "lat": -15.765,
+        "long": -47.876
+      },
+      "resultados_encontrados": 5
     }
   ]
 }

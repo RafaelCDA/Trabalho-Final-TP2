@@ -2,7 +2,7 @@
 IMPLEMENTAÇÃO MÍNIMA - HU-01 e HU-02
 FASE VERDE - Implementar apenas o necessário para testes passarem
 """
-from typing import List
+from typing import List  
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))

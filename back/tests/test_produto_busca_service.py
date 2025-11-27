@@ -6,6 +6,8 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
+from src.api.services.produto_busca_service import ProdutoBuscaService
+
 def test_hu01_busca_produtos_por_nome():
     """HU-01: Como usuário, quero buscar produtos por nome"""
     from api.services.produto_busca_service import ProdutoBuscaService

@@ -11,6 +11,10 @@ usuários, conforme definido nos requisitos funcionais.
 from fastapi import FastAPI
 from src.api.router import router as api_router
 from api.services.produto_busca_service import ProdutoBuscaService 
+try:
+    from api.router import router
+except ImportError:
+    from src.api.router import router
 
 # Instância principal da aplicação
 app = FastAPI(
@@ -24,4 +28,8 @@ app = FastAPI(
 
 # Registro das rotas da aplicação
 app.include_router(router)
+
+@app.get("/")
+async def root():
+    return {"message": "Sistema de Feiras funcionando!"}
 
