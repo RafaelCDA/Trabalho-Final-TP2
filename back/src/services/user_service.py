@@ -5,13 +5,26 @@ Utiliza DTOs como interface de entrada e saída, aplica regras de negócio
 mínimas e delega a persistência ao repositório.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Literal, cast
 from src.repositories.user_repository import UserRepository
 from src.dto.user_dto import (
     UserCreateDTO,
     UserUpdateDTO,
     UserResponseDTO,
 )
+
+
+def _to_iso(value):
+    """
+    Garante compatibilidade com datetime ou string.
+
+    Se o repositório retornar datetime:
+        value.isoformat()
+
+    Se o repositório retornar string:
+        value
+    """
+    return value if isinstance(value, str) else value.isoformat()
 
 
 class UserService:
@@ -37,21 +50,6 @@ class UserService:
     def create_user(self, dto: UserCreateDTO) -> UserResponseDTO:
         """
         Cria um novo usuário aplicando validação simples de e-mail duplicado.
-
-        Parâmetros
-        ----------
-        dto : UserCreateDTO
-            Estrutura contendo nome, e-mail e senha.
-
-        Retorno
-        -------
-        UserResponseDTO
-            Representação pública do usuário recém-criado.
-
-        Exceções
-        --------
-        ValueError
-            Quando o e-mail informado já está cadastrado.
         """
         existing = self.repository.get_by_email(dto.email)
         if existing:
@@ -61,12 +59,16 @@ class UserService:
             name=dto.name,
             email=dto.email,
             password=dto.password,
+            type=dto.type,
         )
 
         return UserResponseDTO(
             id=str(user.id),
             name=str(user.name),
             email=str(user.email),
+            type=cast(Literal["user", "admin", "supplier"], str(user.type)),
+            created_at=_to_iso(user.created_at),
+            updated_at=_to_iso(user.updated_at),
         )
 
     # ---------------------------------------------------------
@@ -75,16 +77,6 @@ class UserService:
     def get_user(self, user_id: str) -> Optional[UserResponseDTO]:
         """
         Retorna informações de um usuário pelo identificador.
-
-        Parâmetros
-        ----------
-        user_id : str
-            Identificador único do usuário.
-
-        Retorno
-        -------
-        UserResponseDTO ou None
-            Estrutura pública do usuário, caso exista.
         """
         user = self.repository.get_by_id(user_id)
         if not user:
@@ -94,6 +86,9 @@ class UserService:
             id=str(user.id),
             name=str(user.name),
             email=str(user.email),
+            type=cast(Literal["user", "admin", "supplier"], str(user.type)),
+            created_at=_to_iso(user.created_at),
+            updated_at=_to_iso(user.updated_at),
         )
 
     # ---------------------------------------------------------
@@ -102,11 +97,6 @@ class UserService:
     def list_users(self) -> List[UserResponseDTO]:
         """
         Lista todos os usuários cadastrados no sistema.
-
-        Retorno
-        -------
-        list[UserResponseDTO]
-            Lista de usuários convertidos para DTO de resposta.
         """
         users = self.repository.get_all()
 
@@ -115,6 +105,9 @@ class UserService:
                 id=str(u.id),
                 name=str(u.name),
                 email=str(u.email),
+                type=cast(Literal["user", "admin", "supplier"], str(u.type)),
+                created_at=_to_iso(u.created_at),
+                updated_at=_to_iso(u.updated_at),
             )
             for u in users
         ]
@@ -127,18 +120,6 @@ class UserService:
     ) -> Optional[UserResponseDTO]:
         """
         Atualiza os dados de um usuário existente.
-
-        Parâmetros
-        ----------
-        user_id : str
-            Identificador do usuário.
-        dto : UserUpdateDTO
-            Estrutura contendo campos opcionais para atualização.
-
-        Retorno
-        -------
-        UserResponseDTO ou None
-            Dados atualizados do usuário, se encontrado.
         """
         user = self.repository.get_by_id(user_id)
         if not user:
@@ -149,6 +130,7 @@ class UserService:
             name=dto.name,
             email=dto.email,
             password=dto.password,
+            type=dto.type,
         )
 
         if updated is None:
@@ -158,6 +140,9 @@ class UserService:
             id=str(updated.id),
             name=str(updated.name),
             email=str(updated.email),
+            type=cast(Literal["user", "admin", "supplier"], str(updated.type)),
+            created_at=_to_iso(updated.created_at),
+            updated_at=_to_iso(updated.updated_at),
         )
 
     # ---------------------------------------------------------
@@ -166,14 +151,5 @@ class UserService:
     def delete_user(self, user_id: str) -> None:
         """
         Remove o usuário associado ao identificador informado.
-
-        Parâmetros
-        ----------
-        user_id : str
-            Identificador do usuário a ser removido.
-
-        Retorno
-        -------
-        None
         """
         self.repository.delete_user(user_id)

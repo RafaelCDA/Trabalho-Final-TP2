@@ -5,8 +5,14 @@ Executa validações básicas utilizando DTOs como interface e
 consulta o repositório para verificar credenciais.
 """
 
+from typing import Literal, cast
 from src.dto.user_dto import LoginDTO, UserResponseDTO
 from src.repositories.user_repository import UserRepository
+
+
+def _to_iso(value):
+    """Permite receber datetime ou string."""
+    return value if isinstance(value, str) else value.isoformat()
 
 
 class AuthService:
@@ -30,16 +36,6 @@ class AuthService:
         """
         Realiza autenticação simples de usuário baseado em e-mail e senha.
 
-        Parâmetros
-        ----------
-        dto : LoginDTO
-            Estrutura contendo e-mail e senha enviados para login.
-
-        Retorno
-        -------
-        UserResponseDTO
-            Dados públicos do usuário autenticado.
-
         Exceções
         --------
         ValueError
@@ -49,7 +45,6 @@ class AuthService:
         if not user:
             raise ValueError("E-mail não encontrado.")
 
-        # Pyright-safe: garantir que é str e não Column
         if str(user.password) != dto.password:
             raise ValueError("Senha incorreta.")
 
@@ -57,4 +52,7 @@ class AuthService:
             id=str(user.id),
             name=str(user.name),
             email=str(user.email),
+            type=cast(Literal["user", "admin", "supplier"], str(user.type)),
+            created_at=_to_iso(user.created_at),
+            updated_at=_to_iso(user.updated_at),
         )

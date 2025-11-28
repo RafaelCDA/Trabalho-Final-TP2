@@ -22,6 +22,7 @@ def test_auth_service_login_sucesso(test_db):
         name="Guilherme",
         email="guilherme@test.com",
         password="123",
+        type="user",
     )
 
     dto = LoginDTO(email="guilherme@test.com", password="123")
@@ -29,6 +30,9 @@ def test_auth_service_login_sucesso(test_db):
 
     assert isinstance(result, UserResponseDTO)
     assert result.email == "guilherme@test.com"
+    assert result.type == "user"
+    assert isinstance(result.created_at, str)
+    assert isinstance(result.updated_at, str)
 
 
 def test_auth_service_email_inexistente(test_db):
@@ -50,6 +54,7 @@ def test_auth_service_senha_incorreta(test_db):
         name="Guilherme",
         email="user@test.com",
         password="senha-correta",
+        type="user",
     )
 
     dto = LoginDTO(email="user@test.com", password="errada")

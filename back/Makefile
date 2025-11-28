@@ -46,7 +46,7 @@ lint: install
 # Testes
 test: install
 	@echo "Executando testes."
-	$(VENV)/bin/pytest
+	$(VENV)/bin/pytest -q
 
 coverage: install
 	@echo "Executando cobertura de testes."
