@@ -8,7 +8,7 @@ describe("Tela de Fornecedor", () => {
     render(<Fornecedor />);
 
     expect(
-      screen.getByRole("heading", { name: /Cadastro de Fornecedores/i })
+      screen.getByRole("heading", { name: /Lista de Fornecedores/i })
     ).toBeInTheDocument();
 
   });
