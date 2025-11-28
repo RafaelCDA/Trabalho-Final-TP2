@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 export default function Fornecedores() {
 
-  // ➜ Fornecedores de teste
   const [fornecedores, setFornecedores] = useState([]);
 
   const [selected, setSelected] = useState<any | null>(null);
@@ -33,9 +32,17 @@ export default function Fornecedores() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {fornecedores.map((f: any, i: number) => (
           <div key={i} className="border p-4 rounded-xl shadow-sm hover:shadow-md transition">
+
             <h3 className="text-lg font-semibold">{f.nome}</h3>
             <p className="text-gray-600">{f.cidade}</p>
-            <p className="text-gray-500 text-sm mt-1">{f.descricao}</p>
+
+            {/* Descrição truncada com ... e quebrando palavras longas */}
+            <p
+              className="text-gray-500 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis break-all"
+              style={{ width: "100%" }}
+            >
+              {f.descricao}
+            </p>
 
             <button
               onClick={() => setSelected(f)}
@@ -43,18 +50,23 @@ export default function Fornecedores() {
             >
               Ver detalhes
             </button>
+
           </div>
         ))}
       </section>
 
-      {/* Modal com fundo BLUR */}
+      {/* Modal com fundo blur + descrição completa */}
       {selected && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl w-80 shadow-xl">
 
             <h3 className="text-xl font-bold">{selected.nome}</h3>
             <p className="text-gray-700 mt-2">{selected.cidade}</p>
-            <p className="text-gray-500 mt-2">{selected.descricao}</p>
+
+            {/* Aqui mostra a descrição INTEIRA */}
+            <p className="text-gray-500 mt-2 whitespace-normal">
+              {selected.descricao}
+            </p>
 
             <button
               onClick={() => setSelected(null)}
