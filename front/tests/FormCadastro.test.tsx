@@ -1,7 +1,7 @@
 // EU009, EU010, EU011 - Testes Completos do Formulário de Cadastro
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import FormCadastro from '../app/FormCadastro';
+import FormCadastro from '../components/forms/FormCadastro';
 import axios from 'axios';
 
 // Mock do axios
