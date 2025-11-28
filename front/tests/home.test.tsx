@@ -10,7 +10,8 @@ describe("Home Page", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("heading", { name: /bem-vindo/i })
+    screen.getByRole("heading", { name: /Garanta 50% de desconto/i })
     ).toBeInTheDocument();
+
   });
 });

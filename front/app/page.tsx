@@ -38,9 +38,6 @@ export default function Home() {
   //E SEREM COLOCADAS POSTERIORMENTE
   <main className="max-w-7xl mx-auto px-6 py-6">
 
-    <h1 className="sr-only">Bem-vindo</h1>
-
-
       <section className="w-full bg-[var(--color-shop-light-pink)] rounded-xl flex items-center justify-between px-10 py-10">
         <div className="flex flex-col gap-4 max-w-md">
           <h2 className="text-3xl font-bold text-[var(--color-shop_dark_green)] leading-snug">
