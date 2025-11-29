@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from .services.produto_busca_service import ProdutoBuscaService
 from ..models.produto_model import BuscaRequest, BuscaResponse
 from .endpoints import health
+from src.endpoints import messages
 
 # Router principal da API
 router = APIRouter()
@@ -42,3 +43,5 @@ async def buscar_produtos(busca: BuscaRequest):
 async def listar_produtos():
     """Lista todos os produtos (para teste)"""
     return busca_service.buscar_produtos("", 0, 0)
+
+router.include_router(messages.router, prefix="/api/v1/messages", tags=["private-messages"])

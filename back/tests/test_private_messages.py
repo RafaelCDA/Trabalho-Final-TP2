@@ -16,34 +16,33 @@ class TestPrivateMessages:
     """Testes para o sistema de mensagens privadas - HU-08"""
     
     def test_send_message_unauthenticated_should_fail(self):
-        """🔴 Teste 1: Usuário NÃO autenticado deve receber 401/403 (NÃO 404)"""
+        """🔴 Teste 1: Usuário NÃO autenticado deve receber 401"""
+        # ROTA CORRIGIDA: /chats em vez de /conversations
         response = client.post(
-            "/api/v1/messages/conversations/1", 
+            "/api/v1/messages/chats/1",  # ← MUDOU AQUI
             json={"content": "Olá, tenho uma dúvida"}
         )
-        # DEVE FALHAR: Espera 401/403 mas recebe 404 (rota não existe)
-        assert response.status_code in [401, 403]  # ← ESTE DEVE FALHAR!
+        assert response.status_code in [401, 403]
     
     def test_send_message_authenticated_should_work(self):
-        """🔴 Teste 2: Usuário autenticado deve conseguir enviar (status 200)"""
-        # Mock de autenticação - mas a rota nem existe ainda
+        """🔴 Teste 2: Usuário autenticado deve conseguir enviar"""
+        # ROTA CORRIGIDA: /chats em vez de /conversations
         response = client.post(
-            "/api/v1/messages/conversations/2",
+            "/api/v1/messages/chats/2",  # ← MUDOU AQUI
             json={"content": "Qual o preço?"},
             headers={"Authorization": "Bearer mock-token"}
         )
-        # DEVE FALHAR: Espera 200 mas recebe 404
-        assert response.status_code == 200  # ← ESTE DEVE FALHAR!
+        assert response.status_code == 200
     
     def test_get_conversations_should_return_list(self):
         """🔴 Teste 3: Deve retornar lista de conversas"""
+        # ROTA CORRIGIDA: /chats em vez de /conversations
         response = client.get(
-            "/api/v1/messages/conversations",
+            "/api/v1/messages/chats",  # ← MUDOU AQUI
             headers={"Authorization": "Bearer mock-token"}
         )
-        # DEVE FALHAR: Espera 200 mas recebe 404
-        assert response.status_code == 200  # ← ESTE DEVE FALHAR!
-        assert isinstance(response.json(), list)  # ← ESTE DEVE FALHAR!
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
 
 def test_basic_always_passes():
     """✅ Este sempre passa para verificar o setup"""

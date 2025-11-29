@@ -7,7 +7,7 @@ resultante fornece suporte às funcionalidades essenciais do sistema,
 incluindo busca de produtos, gerenciamento de fornecedores e interações com
 usuários, conforme definido nos requisitos funcionais.
 """
-
+from src.models.database import Base, engine
 from fastapi import FastAPI
 from src.api.router import router as api_router
 from api.services.produto_busca_service import ProdutoBuscaService 
@@ -33,3 +33,4 @@ app.include_router(router)
 async def root():
     return {"message": "Sistema de Feiras funcionando!"}
 
+Base.metadata.create_all(bind=engine)
