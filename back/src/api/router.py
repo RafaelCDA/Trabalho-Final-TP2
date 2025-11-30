@@ -3,7 +3,7 @@ Módulo responsável por centralizar e expor todos os endpoints da aplicação.
 """
 
 from fastapi import APIRouter
-from .endpoints import health, auth, users
+from .endpoints import health, auth, users, banca
 
 # Router principal da API
 router = APIRouter()
@@ -12,3 +12,4 @@ router = APIRouter()
 router.include_router(health.router, tags=["Health"])
 router.include_router(auth.router, tags=["Auth"])
 router.include_router(users.router, tags=["Users"])
+router.include_router(banca.router, tags=["Bancas"])
