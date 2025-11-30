@@ -1,7 +1,21 @@
+"""
+Repositório responsável pelas operações de acesso e manipulação da entidade Banca.
+
+Encapsula todas as interações com o banco de dados relacionadas às bancas,
+incluindo criação, consulta, listagem e remoção. Esta camada isola a lógica
+de persistência, permitindo que a camada de serviços (service) implemente
+regras de negócio sem conhecimento da estrutura de armazenamento.
+
+Cada método opera sobre uma sessão do SQLAlchemy, fornecida pela camada
+database.py.
+"""
+
+
 from typing import List, Optional
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from src.models.banca import Banca
+
 
 class BancaRepository:
     """

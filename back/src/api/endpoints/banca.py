@@ -1,3 +1,13 @@
+"""
+Endpoints responsáveis pelo gerenciamento de bancas via API.
+
+Esta camada expõe rotas REST para criação, listagem, consulta e exclusão
+de bancas, seguindo os requisitos da HU-10. O endpoint utiliza o serviço
+de bancas (BancaService) como intermediário, garantindo separação clara
+entre regras de negócio e lógica de requisição/resposta.
+"""
+
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 

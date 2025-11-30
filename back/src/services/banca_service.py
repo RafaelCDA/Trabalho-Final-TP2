@@ -1,3 +1,13 @@
+"""
+Serviço responsável pela aplicação das regras de negócio relacionadas à entidade Banca.
+
+A camada de serviços atua como intermediária entre o repositório (persistência)
+e os endpoints (API), validando operações, garantindo integridade dos dados e
+implementando regras exigidas pela HU-10, como obrigatoriedade de campos ou
+verificações adicionais no futuro (como associação com fornecedor autenticado).
+"""
+
+
 from typing import List, Optional
 from datetime import datetime, timezone
 

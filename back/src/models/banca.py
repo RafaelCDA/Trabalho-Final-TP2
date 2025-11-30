@@ -1,8 +1,19 @@
+"""
+Modelo ORM da entidade Banca.
+
+Representa as bancas cadastradas pelos fornecedores dentro da feira.
+Este modelo define os atributos essenciais, como nome, localização,
+descrição e horário de funcionamento, além de informações automáticas
+de criação e atualização.
+
+Utiliza SQLAlchemy ORM para mapear a estrutura da tabela e permitir
+operações CRUD via repositórios e serviços.
+"""
+
 from datetime import datetime, timezone
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer
 from src.core.database import Base
-
 
 class Banca(Base):
     __tablename__ = "bancas"
