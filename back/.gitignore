@@ -1,5 +1,6 @@
 # Ambiente virtual
 .venv/
+venv/
 
 # Compilados Python
 __pycache__/
@@ -40,3 +41,6 @@ site/
 # Ambiente local de dotenv
 .env
 .env.*
+
+# Banco de dados
+*.db

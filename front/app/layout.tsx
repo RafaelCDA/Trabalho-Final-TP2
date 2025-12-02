@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "../components/Header";
-import { Orbitron } from 'next/font/google';
-import { Bangers } from 'next/font/google';
-import { Anton } from 'next/font/google';
+import { anton } from "./fonts";
 
 
 export const metadata: Metadata = {
@@ -13,23 +11,6 @@ export const metadata: Metadata = {
   },
   description: "Let's Goo Buy, Sua loja online favorita para tudo que precisa",
 };
-
-export const orbitron = Orbitron({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-});
-
-
-export const bangers = Bangers({
-  subsets: ['latin'],
-  weight: ['400'],
-});
-
-
-export const anton = Anton({
-  subsets: ['latin'],
-  weight: ['400'],
-});
 
 
 export default function RootLayout({
