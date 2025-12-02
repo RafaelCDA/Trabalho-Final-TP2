@@ -37,6 +37,7 @@ class ProdutoService:
         for produto in self.produtos:
             if produto.id == produto_id:
 
+                # Atualiza apenas campos enviados
                 for campo, valor in data.items():
                     if valor is not None:
                         setattr(produto, campo, valor)
@@ -52,4 +53,12 @@ class ProdutoService:
                 return True
 
         return False
+
+    def buscar_por_texto(self, texto: str):
+        texto = texto.lower()
+        return [
+            produto
+            for produto in self.produtos
+            if texto in produto.nome.lower()
+        ]
 
