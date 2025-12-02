@@ -1,32 +1,30 @@
-"""
-Endpoints responsáveis pelo gerenciamento de bancas via API.
-
-Esta camada expõe rotas REST para criação, listagem, consulta e exclusão
-de bancas, seguindo os requisitos da HU-10. O endpoint utiliza o serviço
-de bancas (BancaService) como intermediário, garantindo separação clara
-entre regras de negócio e lógica de requisição/resposta.
-"""
-
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from src.core.database import SessionLocal
-from src.repositories.banca_repository import BancaRepository
 from src.services.banca_service import BancaService
+from src.repositories.banca_repository import BancaRepository
+from src.repositories.address_repository import AddressRepository
+
 from src.dto.banca_dto import (
-    BancaCreateDTO,
-    BancaResponseDTO,
+    BancaCreate,
+    BancaUpdate,
+    BancaRead,
 )
 
 
 router = APIRouter(prefix="/bancas", tags=["Bancas"])
 
 
-# -----------------------------------------
-# Dependências
-# -----------------------------------------
+# ============================================================
+#  DEPENDÊNCIAS
+# ============================================================
+
+
 def get_db():
+    """
+    Gera uma sessão de banco de dados por requisição.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -35,74 +33,132 @@ def get_db():
 
 
 def get_banca_service(db: Session = Depends(get_db)) -> BancaService:
-    return BancaService(BancaRepository(db))
+    banca_repo = BancaRepository(db)
+    address_repo = AddressRepository(db)
+    return BancaService(banca_repo, address_repo)
 
 
-# -----------------------------------------
-# CREATE
-# -----------------------------------------
+# ============================================================
+#  CREATE
+# ============================================================
+
+
 @router.post(
     "/",
-    response_model=BancaResponseDTO,
+    response_model=BancaRead,
     status_code=status.HTTP_201_CREATED,
     summary="Criar banca",
-    description="Cadastra uma nova banca no sistema.",
+    description=(
+        "Cria uma nova banca no sistema. "
+        "O endereço é criado automaticamente com base nos dados enviados."
+    ),
 )
-def criar_banca(
-    dto: BancaCreateDTO,
+def create_banca(
+    dto: BancaCreate,
     service: BancaService = Depends(get_banca_service),
 ):
-    return service.create_banca(dto)
+    """
+    Endpoint responsável pela criação de uma banca e seu endereço associado.
+    """
+    try:
+        return service.create_banca(dto)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-# -----------------------------------------
-# READ (por ID)
-# -----------------------------------------
+# ============================================================
+#  READ
+# ============================================================
+
+
 @router.get(
     "/{banca_id}",
-    response_model=BancaResponseDTO,
+    response_model=BancaRead,
     summary="Obter banca",
-    description="Retorna os dados de uma banca pelo ID.",
+    description="Retorna os dados de uma banca pelo seu identificador.",
 )
-def obter_banca(
+def get_banca(
     banca_id: int,
     service: BancaService = Depends(get_banca_service),
 ):
+    """
+    Consulta uma banca pelo ID.
+    """
     banca = service.get_banca(banca_id)
     if not banca:
         raise HTTPException(status_code=404, detail="Banca não encontrada.")
     return banca
 
 
-# -----------------------------------------
-# LIST
-# -----------------------------------------
+# ============================================================
+#  LIST
+# ============================================================
+
+
 @router.get(
     "/",
-    response_model=list[BancaResponseDTO],
+    response_model=list[BancaRead],
     summary="Listar bancas",
-    description="Retorna todas as bancas cadastradas.",
+    description="Retorna todas as bancas cadastradas no sistema.",
 )
-def listar_bancas(
+def list_bancas(
     service: BancaService = Depends(get_banca_service),
 ):
+    """
+    Lista todas as bancas registradas.
+    """
     return service.list_bancas()
 
 
-# -----------------------------------------
-# DELETE
-# -----------------------------------------
+# ============================================================
+#  UPDATE
+# ============================================================
+
+
+@router.patch(
+    "/{banca_id}",
+    response_model=BancaRead,
+    summary="Atualizar banca",
+    description=(
+        "Atualiza parcialmente os dados de uma banca existente. "
+        "Somente campos enviados serão modificados."
+    ),
+)
+def update_banca(
+    banca_id: int,
+    dto: BancaUpdate,
+    service: BancaService = Depends(get_banca_service),
+):
+    """
+    Atualiza os dados de uma banca existente.
+    """
+    updated = service.update_banca(banca_id, dto)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Banca não encontrada.")
+    return updated
+
+
+# ============================================================
+#  DELETE
+# ============================================================
+
+
 @router.delete(
     "/{banca_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Excluir banca",
-    description="Remove uma banca pelo seu identificador.",
+    summary="Remover banca",
+    description="Remove uma banca do sistema pelo seu identificador.",
 )
-def deletar_banca(
+def delete_banca(
     banca_id: int,
     service: BancaService = Depends(get_banca_service),
 ):
-    deleted = service.delete_banca(banca_id)
-    if not deleted:
+    """
+    Remove a banca correspondente ao ID informado.
+    """
+    banca = service.get_banca(banca_id)
+    if not banca:
         raise HTTPException(status_code=404, detail="Banca não encontrada.")
+
+    service.delete_banca(banca_id)
     return None
