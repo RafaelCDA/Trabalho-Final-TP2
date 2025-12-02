@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from src.main import app
 
@@ -10,7 +9,7 @@ def test_criar_banca_deve_retornar_201():
         "nome": "Banca TDD",
         "localizacao": "Feira Central",
         "descricao": "Banca criada no TDD",
-        "horario_funcionamento": "08h - 18h"
+        "horario_funcionamento": "08h - 18h",
     }
 
     response = client.post("/bancas/", json=payload)

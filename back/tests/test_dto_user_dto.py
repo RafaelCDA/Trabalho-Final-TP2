@@ -49,7 +49,7 @@ def test_user_create_dto_tipo_invalido():
             name="Guilherme",
             email="valido@test.com",
             password="123",
-            type="INVALIDO", # pyright: ignore[reportArgumentType]
+            type="INVALIDO",  # pyright: ignore[reportArgumentType]
         )
 
 

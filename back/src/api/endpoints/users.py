@@ -18,6 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 #  DEPENDÊNCIAS
 # ============================================================
 
+
 def get_db():
     """
     Fornece uma sessão de banco por requisição.
@@ -39,6 +40,7 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 # ============================================================
 #  CREATE
 # ============================================================
+
 
 @router.post(
     "/",
@@ -64,6 +66,7 @@ def create_user(
 #  READ
 # ============================================================
 
+
 @router.get(
     "/{user_id}",
     response_model=UserResponseDTO,
@@ -87,6 +90,7 @@ def get_user(
 #  LIST
 # ============================================================
 
+
 @router.get(
     "/",
     response_model=list[UserResponseDTO],
@@ -105,6 +109,7 @@ def list_users(
 # ============================================================
 #  UPDATE
 # ============================================================
+
 
 @router.patch(
     "/{user_id}",
@@ -132,6 +137,7 @@ def update_user(
 # ============================================================
 #  DELETE
 # ============================================================
+
 
 @router.delete(
     "/{user_id}",
