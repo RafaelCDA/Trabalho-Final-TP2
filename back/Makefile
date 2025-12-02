@@ -93,6 +93,7 @@ clean:
 	$(RM) htmlcov
 	$(RM) site
 	$(RM) .coverage
+	$(RM) data/*.db
 
 ifeq ($(OS),Windows_NT)
 	@echo "Removendo __pycache__ recursivamente."

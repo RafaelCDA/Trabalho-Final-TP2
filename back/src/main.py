@@ -10,11 +10,11 @@ usuários, conforme definido nos requisitos funcionais.
 
 from fastapi import FastAPI
 from src.api.router import router as api_router
+from src.core.database import Base, engine
 from api.services.produto_busca_service import ProdutoBuscaService 
-try:
-    from api.router import router
-except ImportError:
-    from src.api.router import router
+
+# Criação das tabelas do banco no momento de inicialização
+Base.metadata.create_all(bind=engine)
 
 # Instância principal da aplicação
 app = FastAPI(
@@ -27,7 +27,7 @@ app = FastAPI(
 )
 
 # Registro das rotas da aplicação
-app.include_router(router)
+app.include_router(api_router)
 
 @app.get("/")
 async def root():
