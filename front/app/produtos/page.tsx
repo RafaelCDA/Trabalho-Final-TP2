@@ -104,7 +104,6 @@ export default function Produtos() {
         Lista de Produtos
       </h2>
 
-      {/* Filtros de Categoria */}
       <section className="mb-10 flex items-center justify-between">
         <div className="flex gap-4">
           {categories.map((cat) => (
@@ -121,13 +120,8 @@ export default function Produtos() {
             </button>
           ))}
         </div>
-
-        <button className="border px-4 py-2 rounded-full text-gray-700 hover:bg-gray-100">
-          Veja todos
-        </button>
       </section>
 
-      {/* Grid de Produtos */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {produtosFiltrados.length === 0 ? (
           <div className="col-span-full text-center py-10 text-gray-500">
@@ -185,7 +179,6 @@ export default function Produtos() {
         )}
       </section>
 
-      {/* Modal de Detalhes */}
       {selected && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-96 shadow-xl">
