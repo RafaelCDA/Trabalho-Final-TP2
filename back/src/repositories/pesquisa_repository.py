@@ -5,7 +5,7 @@ Responsável por registrar e consultar pesquisas realizadas pelos usuários.
 Serve como ponte entre o modelo Pesquisa e a camada de serviços.
 """
 
-from typing import Optional, Sequence
+from typing import Optional, Sequence, List
 from sqlalchemy.orm import Session
 
 from src.models.pesquisa import Pesquisa
@@ -59,3 +59,6 @@ class PesquisaRepository:
         Retorna uma pesquisa específica pelo ID.
         """
         return self.db.query(Pesquisa).filter_by(id=pesquisa_id).first()
+
+    def get_all(self) -> List[Pesquisa]:
+        return self.db.query(Pesquisa).all()
