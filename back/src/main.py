@@ -11,6 +11,7 @@ usuários, conforme definido nos requisitos funcionais.
 from fastapi import FastAPI
 from src.api.router import router as api_router
 from src.core.database import Base, engine
+from api.services.produto_busca_service import ProdutoBuscaService 
 
 # Criação das tabelas do banco no momento de inicialização
 Base.metadata.create_all(bind=engine)
@@ -27,3 +28,8 @@ app = FastAPI(
 
 # Registro das rotas da aplicação
 app.include_router(api_router)
+
+@app.get("/")
+async def root():
+    return {"message": "Sistema de Feiras funcionando!"}
+
