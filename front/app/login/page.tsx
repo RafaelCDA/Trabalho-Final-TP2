@@ -2,17 +2,43 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios, { AxiosError } from "axios";
+
 
 export default function Login() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // Aqui você faria a autenticação (API, Firebase, etc.)
-    console.log("Tentando login:", { email, senha });
+
+    const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + "/auth/login", 
+      {
+        "email": email,
+        "password": senha  
+      }
+    ).then((r) => {
+      const user = {
+        id: r.data.id,
+        name: r.data.email,
+        email: r.data.email,
+        type: r.data.type
+      };
+      sessionStorage.setItem("user", JSON.stringify(user));
+
+      // sinaliza outras partes da app (mesma aba) que o usuário mudou
+      window.dispatchEvent(new Event("userChanged"));
+
+      // navega para a home
+      router.push("/");
+    }).catch(e =>  {
+      if (e.status !== 500){
+        setError(e.response.data.detail)
+      }
+    });
   };
 
   return (
@@ -53,7 +79,13 @@ export default function Login() {
           />
         </div>
 
-        {/* Botão */}
+        {error ? (
+          <div className="flex items-center">
+            <p className="text-red-400 font-bold text-lg">
+              {error}
+            </p>
+          </div>
+        ):(<></>)}
         <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition"
