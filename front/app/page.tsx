@@ -23,21 +23,17 @@ interface Banca {
 
 export default function Home() {
 
-  // --- categorias da UI ---
-  const categories = ["todos", "produtos", "bancas"];
+  const categories = ["Todos", "Produtos", "Bancas"];
 
-  // --- estados principais ---
   const [activeCategory, setActiveCategory] = useState("todos");
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [bancas, setBancas] = useState<Banca[]>([]);
   const [search, setSearch] = useState("");
 
-  // --- filtros locais ---
   const [precoMax, setPrecoMax] = useState<number | undefined>(undefined);
   const [distancia, setDistancia] = useState<number | undefined>(undefined);
   const [orderBy, setOrderBy] = useState<"preco" | "distancia" | undefined>(undefined);
 
-  // --- filtros enviados ao backend ---
   const [filtros, setFiltros] = useState({
     termo: "",
     tipo: "all",
@@ -50,9 +46,7 @@ export default function Home() {
     lon_ref: -49.273300,
   });
 
-  // ============================================================
-  // CONSULTA CENTRAL AO BACKEND
-  // ============================================================
+  //chamada para o back 
   async function fetchSearch(params: typeof filtros) {
     try {
       const url = new URL("http://localhost:80/pesquisa");
@@ -94,10 +88,6 @@ export default function Home() {
     fetchSearch(filtros);
   }, [filtros]);
 
-  // ============================================================
-  // HANDLERS DE FILTROS
-  // ============================================================
-
   function handleSearch(text: string) {
     setSearch(text);
     setFiltros(f => ({ ...f, termo: text }));
@@ -107,11 +97,11 @@ export default function Home() {
     setActiveCategory(cat);
 
     const tipo =
-      cat === "todos"
+      cat === "Todos"
         ? "all"
-        : cat === "produtos"
-        ? "produto"
-        : "banca";
+        : cat === "Produtos"
+        ? "Produto"
+        : "Banca";
 
     setFiltros(f => ({ ...f, tipo }));
   }
@@ -132,14 +122,11 @@ export default function Home() {
     setFiltros(f => ({ ...f, order_by: val }));
   }
 
-  // ============================================================
-  // RENDERIZAÇÃO
-  // ============================================================
+
 
   return (
     <main className="max-w-7xl mx-auto mb-10 px-6 py-6">
 
-      {/* --- barra de pesquisa --- */}
       <section className="mb-10 flex justify-center">
         <div className="w-full max-w-xl flex items-center gap-3 px-5 py-3 
             bg-white rounded-full shadow-md border border-gray-200">
@@ -161,7 +148,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- categorias --- */}
+      <section className="w-full bg-[var(--color-shop-light-pink)] rounded-xl flex items-center justify-between px-10 py-10">
+
+        <div className="flex flex-col gap-4 max-w-md">
+          <h2 className="text-3xl font-bold text-[var(--color-shop_dark_green)] leading-snug">
+            Garanta 50% de desconto <br /> Selecione o produto hoje!
+          </h2>
+        </div>
+
+        <div className="w-[300px] h-[300px] relative flex items-center justify-center">
+          <Image
+            src="/headphone.png" 
+            alt="Headphone"
+            fill
+            className="object-contain scale-[1.2]"
+          />
+        </div>
+      </section>
+
       <section className="mt-10 flex items-center gap-4">
         {categories.map((cat) => (
           <button key={cat} onClick={() => handleCategory(cat)}
@@ -193,7 +197,24 @@ export default function Home() {
               max={200}
               value={precoMax ?? 0}
               onChange={(e) => handlePreco(Number(e.target.value))}
-              className="w-full"
+              className="
+                w-full
+                h-2
+                appearance-none
+                bg-transparent
+
+                [&::-webkit-slider-runnable-track]:bg-[var(--color-shop_dark_green)]
+                [&::-webkit-slider-runnable-track]:h-2
+                [&::-webkit-slider-runnable-track]:rounded-lg
+
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:w-4
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-[var(--color-shop_light_green)]
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:mt-[-6px]
+              "
             />
 
             <p className="text-sm text-gray-600">
@@ -211,7 +232,24 @@ export default function Home() {
               max={2000}
               value={distancia ?? 0}
               onChange={(e) => handleDistancia(Number(e.target.value))}
-              className="w-full"
+              className="
+                w-full
+                h-2
+                appearance-none
+                bg-transparent
+
+                [&::-webkit-slider-runnable-track]:bg-[var(--color-shop_dark_green)]
+                [&::-webkit-slider-runnable-track]:h-2
+                [&::-webkit-slider-runnable-track]:rounded-lg
+
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:w-4
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-[var(--color-shop_light_green)]
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:mt-[-6px]
+              "
             />
 
             <p className="text-sm text-gray-600">
