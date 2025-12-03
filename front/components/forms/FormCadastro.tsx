@@ -1,4 +1,3 @@
-// EU009, EU010, EU011 - Formulário Único de Cadastro
 'use client';
 
 import { useState } from 'react';
@@ -7,26 +6,31 @@ import axios from 'axios';
 type TipoCadastro = 'fornecedor' | 'banca' | 'produto';
 
 interface FormData {
-  // Fornecedor (EU009)
+  // Comuns
   nome?: string;
-  email?: string;
-  cidade?: string;
   descricao?: string;
+
+  // Fornecedor (EU009)
+  email?: string;
+  cidade?: string; // Cidade do fornecedor (string simples)
   
-  // Banca (EU010)
-  endereco?: string;
+  // Banca (EU010) - Backend exige endereço estruturado
+  supplier_id?: string;
+  horario_funcionamento?: string;
+  // Endereço da Banca
+  street?: string;
+  number?: string;
+  district?: string;
+  city_banca?: string;
+  state?: string;
+  zip_code?: string;
   latitude?: string;
   longitude?: string;
-  horario_abertura?: string;
-  horario_fechamento?: string;
-  fornecedor_id?: string;
   
   // Produto (EU011)
-  description?: string;
-  price_in?: string;
-  category?: string;
-  unit_of_measurement?: string;
-  bar_shelf_id?: string;
+  preco?: string;
+  imagem?: string;
+  banca_id?: string;
 }
 
 export default function FormCadastro() {
@@ -35,39 +39,33 @@ export default function FormCadastro() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
+  // Reset do formulário ao trocar de aba
   const handleTipoChange = (novoTipo: TipoCadastro) => {
     setTipo(novoTipo);
-    setFormData({}); // Limpa campos ao trocar de aba
+    setFormData({});
     setMessage({ type: '', text: '' });
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Validação básica antes de enviar
   const validarCampos = (): boolean => {
     if (tipo === 'fornecedor') {
       return !!(formData.nome && formData.email && formData.cidade);
     } else if (tipo === 'banca') {
       return !!(
         formData.nome && 
-        formData.endereco && 
-        formData.latitude && 
-        formData.longitude && 
-        formData.horario_abertura && 
-        formData.horario_fechamento
+        formData.supplier_id && 
+        formData.street && 
+        formData.city_banca && 
+        formData.state && 
+        formData.zip_code
       );
     } else if (tipo === 'produto') {
-      return !!(
-        formData.description && 
-        formData.price_in && 
-        formData.category && 
-        formData.unit_of_measurement
-      );
+      return !!(formData.nome && formData.preco && formData.banca_id);
     }
     return false;
   };
@@ -76,7 +74,7 @@ export default function FormCadastro() {
     e.preventDefault();
     
     if (!validarCampos()) {
-      setMessage({ type: 'error', text: 'Preencha todos os campos obrigatórios' });
+      setMessage({ type: 'error', text: 'Preencha todos os campos obrigatórios (*)' });
       return;
     }
 
@@ -84,56 +82,60 @@ export default function FormCadastro() {
     setMessage({ type: '', text: '' });
 
     try {
-      let endpoint = '';
-      let data = {};
+      let url = '';
+      let payload = {};
 
+      // --- Lógica de Envio para Fornecedor ---
       if (tipo === 'fornecedor') {
-        endpoint = 'http://localhost:3000/suppliers';
-        data = {
+        url = 'http://localhost:8000/suppliers/';
+        payload = {
           nome: formData.nome,
           email: formData.email,
           cidade: formData.cidade,
-          descricao: formData.descricao || ''
+          descricao: formData.descricao
         };
-      } else if (tipo === 'banca') {
-        endpoint = 'http://localhost:3000/bancas';
-        data = {
+      } 
+      // --- Lógica de Envio para Banca ---
+      else if (tipo === 'banca') {
+        url = 'http://localhost:8000/bancas/';
+        payload = {
           nome: formData.nome,
-          descricao: formData.descricao || '',
-          endereco: formData.endereco,
-          latitude: parseFloat(formData.latitude!),
-          longitude: parseFloat(formData.longitude!),
-          horario_abertura: formData.horario_abertura,
-          horario_fechamento: formData.horario_fechamento,
-          fornecedor_id: formData.fornecedor_id ? parseInt(formData.fornecedor_id) : undefined
+          descricao: formData.descricao,
+          horario_funcionamento: formData.horario_funcionamento,
+          supplier_id: formData.supplier_id,
+          // O Backend exige um objeto 'address' aninhado
+          address: {
+            street: formData.street,
+            number: formData.number,
+            district: formData.district,
+            city: formData.city_banca,
+            state: formData.state,
+            zip_code: formData.zip_code,
+            latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+            longitude: formData.longitude ? parseFloat(formData.longitude) : null
+          }
         };
-      } else if (tipo === 'produto') {
-        endpoint = 'http://localhost:3000/produtos';
-        data = {
-              nome: formData.nome,
-          description: formData.description,
-          price_in: parseFloat(formData.price_in!),
-          category: formData.category,
-          unit_of_measurement: formData.unit_of_measurement,
-          bar_shelf_id: formData.bar_shelf_id ? parseInt(formData.bar_shelf_id) : undefined
+      } 
+      // --- Lógica de Envio para Produto ---
+      else if (tipo === 'produto') {
+        url = 'http://localhost:8000/produtos/';
+        payload = {
+          nome: formData.nome,
+          preco: parseFloat(formData.preco || '0'),
+          imagem: formData.imagem,
+          banca_id: parseInt(formData.banca_id || '0')
         };
       }
 
-      await axios.post(endpoint, data);
+      await axios.post(url, payload);
 
-      const mensagens = {
-        fornecedor: 'Fornecedor cadastrado com sucesso!',
-        banca: 'Banca cadastrada com sucesso!',
-        produto: 'Produto cadastrado com sucesso!'
-      };
+      setMessage({ type: 'success', text: `Cadastro de ${tipo} realizado com sucesso!` });
+      setFormData({}); // Limpar formulário após sucesso
 
-      setMessage({ type: 'success', text: mensagens[tipo] });
-      setFormData({});
-    } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: 'Erro ao cadastrar. Tente novamente.' 
-      });
+    } catch (error: any) {
+      console.error(error);
+      const errorMsg = error.response?.data?.detail || 'Erro ao conectar com o servidor.';
+      setMessage({ type: 'error', text: `Erro: ${errorMsg}` });
     } finally {
       setLoading(false);
     }
@@ -148,11 +150,9 @@ export default function FormCadastro() {
             latitude: position.coords.latitude.toString(),
             longitude: position.coords.longitude.toString()
           }));
-          setMessage({ type: 'success', text: 'Localização obtida com sucesso!' });
+          setMessage({ type: 'success', text: 'Localização GPS obtida!' });
         },
-        () => {
-          setMessage({ type: 'error', text: 'Erro ao obter localização' });
-        }
+        () => setMessage({ type: 'error', text: 'Permissão de localização negada.' })
       );
     }
   };
@@ -160,361 +160,191 @@ export default function FormCadastro() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white shadow-md rounded-lg p-8">
+        <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-100">
           
-          {/* Tabs */}
-          <div className="flex gap-2 mb-8">
-            <button
-              role="button"
-              onClick={() => handleTipoChange('fornecedor')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                tipo === 'fornecedor'
-                  ? 'bg-[var(--color-shop_light_green)] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Fornecedor
-            </button>
-            <button
-              role="button"
-              onClick={() => handleTipoChange('banca')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                tipo === 'banca'
-                  ? 'bg-[var(--color-shop_light_green)] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Banca
-            </button>
-            <button
-              role="button"
-              onClick={() => handleTipoChange('produto')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                tipo === 'produto'
-                  ? 'bg-[var(--color-shop_light_green)] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Produto
-            </button>
+          {/* Navegação entre Abas */}
+          <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-lg">
+            {(['fornecedor', 'banca', 'produto'] as TipoCadastro[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => handleTipoChange(t)}
+                className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-all ${
+                  tipo === t
+                    ? 'bg-white text-[var(--color-shop_dark_green)] shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
           </div>
 
-          {/* Título */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            {tipo === 'fornecedor' && 'Cadastro de Fornecedor'}
-            {tipo === 'banca' && 'Cadastro de Banca'}
-            {tipo === 'produto' && 'Cadastro de Produto'}
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">
+            {tipo === 'fornecedor' && 'Novo Fornecedor'}
+            {tipo === 'banca' && 'Nova Banca'}
+            {tipo === 'produto' && 'Novo Produto'}
           </h1>
 
-          {/* Mensagens */}
+          {/* Feedback Visual */}
           {message.text && (
-            <div
-              className={`mb-6 p-4 rounded-md ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}
-            >
+            <div className={`mb-6 p-4 rounded-lg text-sm font-medium ${
+              message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
               {message.text}
             </div>
           )}
 
-          {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* FORNECEDOR (EU009) */}
+            {/* ================= FORNECEDOR ================= */}
             {tipo === 'fornecedor' && (
               <>
-                <div>
-                  <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome *
-                  </label>
-                  <input
-                    type="text"
-                    id="nome"
-                    name="nome"
-                    value={formData.nome || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nome do fornecedor"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-form">Nome *</label>
+                    <input name="nome" value={formData.nome || ''} onChange={handleChange} className="input-form" placeholder="Ex: João da Silva" />
+                  </div>
+                  <div>
+                    <label className="label-form">Email *</label>
+                    <input name="email" type="email" value={formData.email || ''} onChange={handleChange} className="input-form" placeholder="joao@email.com" />
+                  </div>
                 </div>
-
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="email@exemplo.com"
-                  />
+                  <label className="label-form">Cidade *</label>
+                  <input name="cidade" value={formData.cidade || ''} onChange={handleChange} className="input-form" placeholder="Brasília" />
                 </div>
-
                 <div>
-                  <label htmlFor="cidade" className="block text-sm font-medium text-gray-700 mb-2">
-                    Cidade *
-                  </label>
-                  <input
-                    type="text"
-                    id="cidade"
-                    name="cidade"
-                    value={formData.cidade || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Cidade do fornecedor"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 mb-2">
-                    Descrição
-                  </label>
-                  <textarea
-                    id="descricao"
-                    name="descricao"
-                    value={formData.descricao || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Descrição do fornecedor"
-                  />
+                  <label className="label-form">Descrição</label>
+                  <textarea name="descricao" value={formData.descricao || ''} onChange={handleChange} rows={3} className="input-form" placeholder="Biografia ou detalhes..." />
                 </div>
               </>
             )}
 
-            {/* BANCA (EU010) */}
+            {/* ================= BANCA ================= */}
             {tipo === 'banca' && (
               <>
-                <div>
-                  <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome da Banca *
-                  </label>
-                  <input
-                    type="text"
-                    id="nome"
-                    name="nome"
-                    value={formData.nome || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nome da banca"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-form">Nome da Banca *</label>
+                    <input name="nome" value={formData.nome || ''} onChange={handleChange} className="input-form" placeholder="Ex: Banca do João" />
+                  </div>
+                  <div>
+                    <label className="label-form">ID do Fornecedor *</label>
+                    <input name="supplier_id" value={formData.supplier_id || ''} onChange={handleChange} className="input-form" placeholder="UUID do fornecedor" />
+                  </div>
                 </div>
 
-                <div>
-                  <label htmlFor="endereco" className="block text-sm font-medium text-gray-700 mb-2">
-                    Endereço *
-                  </label>
-                  <input
-                    type="text"
-                    id="endereco"
-                    name="endereco"
-                    value={formData.endereco || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Endereço completo"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Localização GPS *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={obterLocalizacao}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      📍 Obter localização atual
-                    </button>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                  <h3 className="font-semibold text-gray-700 text-sm">Endereço da Banca</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="label-form">Logradouro (Rua) *</label>
+                      <input name="street" value={formData.street || ''} onChange={handleChange} className="input-form" placeholder="Av. Principal" />
+                    </div>
+                    <div>
+                      <label className="label-form">Número</label>
+                      <input name="number" value={formData.number || ''} onChange={handleChange} className="input-form" placeholder="123" />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="latitude" className="block text-xs text-gray-600 mb-1">
-                        Latitude *
-                      </label>
-                      <input
-                        type="number"
-                        step="any"
-                        id="latitude"
-                        name="latitude"
-                        value={formData.latitude || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="-15.7801"
-                      />
+                      <label className="label-form">Bairro</label>
+                      <input name="district" value={formData.district || ''} onChange={handleChange} className="input-form" />
                     </div>
                     <div>
-                      <label htmlFor="longitude" className="block text-xs text-gray-600 mb-1">
-                        Longitude *
-                      </label>
-                      <input
-                        type="number"
-                        step="any"
-                        id="longitude"
-                        name="longitude"
-                        value={formData.longitude || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="-47.9292"
-                      />
+                      <label className="label-form">CEP *</label>
+                      <input name="zip_code" value={formData.zip_code || ''} onChange={handleChange} className="input-form" placeholder="00000-000" />
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="horario_abertura" className="block text-sm font-medium text-gray-700 mb-2">
-                      Horário Abertura *
-                    </label>
-                    <input
-                      type="time"
-                      id="horario_abertura"
-                      name="horario_abertura"
-                      value={formData.horario_abertura || ''}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="label-form">Cidade *</label>
+                      <input name="city_banca" value={formData.city_banca || ''} onChange={handleChange} className="input-form" />
+                    </div>
+                    <div>
+                      <label className="label-form">Estado (UF) *</label>
+                      <input name="state" value={formData.state || ''} onChange={handleChange} className="input-form" maxLength={2} placeholder="DF" />
+                    </div>
                   </div>
-                  <div>
-                    <label htmlFor="horario_fechamento" className="block text-sm font-medium text-gray-700 mb-2">
-                      Horário Fechamento *
-                    </label>
-                    <input
-                      type="time"
-                      id="horario_fechamento"
-                      name="horario_fechamento"
-                      value={formData.horario_fechamento || ''}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                    <div>
+                      <label className="label-form">Latitude</label>
+                      <input name="latitude" type="number" step="any" value={formData.latitude || ''} onChange={handleChange} className="input-form text-xs" />
+                    </div>
+                    <div>
+                      <label className="label-form">Longitude</label>
+                      <input name="longitude" type="number" step="any" value={formData.longitude || ''} onChange={handleChange} className="input-form text-xs" />
+                    </div>
                   </div>
+                  <button type="button" onClick={obterLocalizacao} className="text-xs text-blue-600 hover:underline font-medium">
+                    📍 Pegar minha localização atual
+                  </button>
                 </div>
 
                 <div>
-                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 mb-2">
-                    Descrição
-                  </label>
-                  <textarea
-                    id="descricao"
-                    name="descricao"
-                    value={formData.descricao || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Descrição da banca"
-                  />
+                  <label className="label-form">Horário de Funcionamento</label>
+                  <input name="horario_funcionamento" value={formData.horario_funcionamento || ''} onChange={handleChange} className="input-form" placeholder="Ex: 08:00 - 18:00" />
+                </div>
+                
+                <div>
+                  <label className="label-form">Descrição</label>
+                  <textarea name="descricao" value={formData.descricao || ''} onChange={handleChange} className="input-form" rows={2} />
                 </div>
               </>
             )}
 
-            {/* PRODUTO (EU011) */}
+            {/* ================= PRODUTO ================= */}
             {tipo === 'produto' && (
-            <>
+              <>
                 <div>
-                <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome do Produto *
-                </label>
-                <input
-                    type="text"
-                    id="nome"
-                    name="nome"
-                    value={formData.nome || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nome do produto"
-                />
+                  <label className="label-form">Nome do Produto *</label>
+                  <input name="nome" value={formData.nome || ''} onChange={handleChange} className="input-form" placeholder="Ex: Maçã Gala" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-form">Preço (R$) *</label>
+                    <input name="preco" type="number" step="0.01" value={formData.preco || ''} onChange={handleChange} className="input-form" placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label className="label-form">ID da Banca *</label>
+                    <input name="banca_id" type="number" value={formData.banca_id || ''} onChange={handleChange} className="input-form" placeholder="ID numérico" />
+                  </div>
                 </div>
 
                 <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Descrição *
-                </label>
-                <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Descrição detalhada do produto"
-                />
+                  <label className="label-form">URL da Imagem</label>
+                  <input name="imagem" value={formData.imagem || ''} onChange={handleChange} className="input-form" placeholder="https://..." />
                 </div>
-
-                <div>
-                <label htmlFor="price_in" className="block text-sm font-medium text-gray-700 mb-2">
-                    Preço *
-                </label>
-                <input
-                    type="number"
-                    step="0.01"
-                    id="price_in"
-                    name="price_in"
-                    value={formData.price_in || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                />
-                </div>
-
-                <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                    Categoria *
-                </label>
-                <select
-                    id="category"
-                    name="category"
-                    value={formData.category || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="">Selecione uma categoria</option>
-                    <option value="Dispositivos">Dispositivos</option>
-                    <option value="Eletrodomésticos">Eletrodomésticos</option>
-                    <option value="Refrigeradores">Refrigeradores</option>
-                    <option value="Outros">Outros</option>
-                </select>
-                </div>
-
-                <div>
-                <label htmlFor="unit_of_measurement" className="block text-sm font-medium text-gray-700 mb-2">
-                    Unidade de Medida *
-                </label>
-                <input
-                    type="text"
-                    id="unit_of_measurement"
-                    name="unit_of_measurement"
-                    value={formData.unit_of_measurement || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ex: unidade, kg, litro"
-                />
-                </div>
-            </>
+              </>
             )}
 
-
-            {/* Botão Submit */}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-md font-medium text-white transition-colors ${
-                loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[var(--color-shop_light_green)] hover:bg-green-600'
+              className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all transform active:scale-95 ${
+                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[var(--color-shop_light_green)] hover:bg-green-600 shadow-md'
               }`}
             >
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
+              {loading ? 'Processando...' : 'Cadastrar'}
             </button>
+
           </form>
         </div>
       </div>
+
+      <style jsx>{`
+        .label-form {
+          @apply block text-sm font-semibold text-gray-700 mb-1;
+        }
+        .input-form {
+          @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-shop_light_green)] focus:border-transparent outline-none transition-shadow;
+        }
+      `}</style>
     </div>
   );
 }
