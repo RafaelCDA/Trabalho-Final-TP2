@@ -9,14 +9,14 @@ usuários, conforme definido nos requisitos funcionais.
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.api.router import router as api_router
-from api.services.produto_busca_service import ProdutoBuscaService 
-try:
-    from api.router import router
-except ImportError:
-    from src.api.router import router
+from src.core.database import Base, engine
 
-# Instância principal da aplicação
+# Criação das tabelas no banco
+Base.metadata.create_all(bind=engine)
+
+# Instância principal
 app = FastAPI(
     title="Sistema de Compras em Feiras",
     description=(
@@ -26,10 +26,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Registro das rotas da aplicação
-app.include_router(router)
-
-@app.get("/")
-async def root():
-    return {"message": "Sistema de Feiras funcionando!"}
-
+app.include_router(api_router)
