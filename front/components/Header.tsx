@@ -76,9 +76,12 @@ export default function Header() {
         <div className="flex-1 flex justify-end">
           {user ? (
             <div className="flex items-center gap-6">
-              <span className="font-medium text-green-700 cursor-pointer hover:text-green-800">
+              <Link
+                href={"/perfil"}
+                className="font-medium text-green-700 cursor-pointer hover:text-green-800"
+              >
                 Perfil
-              </span>
+              </Link>
 
               <button
                 onClick={logout}
@@ -88,12 +91,12 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            <button
-              onClick={fakeLogin}
-              className="font-medium hover:text-green-600"
+            <Link
+              href={"/login"}
+              className="font-medium text-green-700 cursor-pointer hover:text-green-800"
             >
               Login
-            </button>
+            </Link>
           )}
         </div>
 
