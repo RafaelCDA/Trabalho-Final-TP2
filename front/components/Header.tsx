@@ -2,13 +2,15 @@
 import { Heart, Search, ShoppingBag } from "lucide-react";
 import {anton} from '@/app/fonts';
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
 export default function Header() {
 
     const pathname = usePathname(); // rota atual
+    const router = useRouter();
+
 
     const links = [
         { name: "Home", href: "/" },
@@ -19,28 +21,40 @@ export default function Header() {
 
     const [user, setUser] = useState<any>(null);
 
-    // carregar usuário salvo na sessionStorage
+    // carregar usuário salvo e reagir a mudanças (login/logout/redirecionamento)
     useEffect(() => {
-        const data = sessionStorage.getItem("user");
-        if (data) {
-        setUser(JSON.parse(data));
-        }
-    }, []);
-
-    function fakeLogin() {
-        const fakeUser = {
-        id: 123,
-        isLogged: "abc123tokenfake",
+        const load = () => {
+            const data = sessionStorage.getItem("user");
+            setUser(data ? JSON.parse(data) : null);
         };
 
-        sessionStorage.setItem("user", JSON.stringify(fakeUser));
-        setUser(fakeUser);
-    }
+        // carregar ao montar / quando pathname muda
+        load();
+
+        // quando outra aba alterar sessionStorage
+        const onStorage = (e: StorageEvent) => {
+            if (e.key === "user") load();
+        };
+
+        // evento custom para mesma aba (disparado no login)
+        const onUserChanged = () => load();
+
+        window.addEventListener("storage", onStorage);
+        window.addEventListener("userChanged", onUserChanged);
+
+        return () => {
+            window.removeEventListener("storage", onStorage);
+            window.removeEventListener("userChanged", onUserChanged);
+        };
+    }, [pathname]);
 
     function logout() {
         sessionStorage.removeItem("user");
         setUser(null);
+        
+        router.push("/");
     }
+    
     return (
     <header className="w-full bg-white">
       <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
@@ -76,9 +90,12 @@ export default function Header() {
         <div className="flex-1 flex justify-end">
           {user ? (
             <div className="flex items-center gap-6">
-              <span className="font-medium text-green-700 cursor-pointer hover:text-green-800">
+              <Link
+                href={"/perfil"}
+                className="font-medium text-green-700 cursor-pointer hover:text-green-800"
+              >
                 Perfil
-              </span>
+              </Link>
 
               <button
                 onClick={logout}
@@ -88,12 +105,12 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            <button
-              onClick={fakeLogin}
-              className="font-medium hover:text-green-600"
+            <Link
+              href={"/login"}
+              className="font-medium text-green-700 cursor-pointer hover:text-green-800"
             >
               Login
-            </button>
+            </Link>
           )}
         </div>
 
