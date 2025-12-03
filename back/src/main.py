@@ -9,13 +9,14 @@ usuários, conforme definido nos requisitos funcionais.
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.api.router import router as api_router
 from src.core.database import Base, engine
 
-# Criação das tabelas do banco no momento de inicialização
+# Criação das tabelas no banco
 Base.metadata.create_all(bind=engine)
 
-# Instância principal da aplicação
+# Instância principal
 app = FastAPI(
     title="Sistema de Compras em Feiras",
     description=(
@@ -23,6 +24,19 @@ app = FastAPI(
         "entre usuários, fornecedores e administradores."
     ),
     version="1.0.0",
+)
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Registro das rotas da aplicação
