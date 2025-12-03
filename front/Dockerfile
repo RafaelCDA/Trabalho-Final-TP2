@@ -1,14 +1,13 @@
 FROM node:23-alpine
 
-# Set the working directory
-WORKDIR /var/www
+WORKDIR /app
 
-COPY ./front/package*.json /var/www
+COPY package*.json /app
 
 RUN npm install
 
-COPY ./front .
+COPY . .
 
 EXPOSE 3000
 
-CMD ["npm","run","dev"]
+CMD ["npm", "run", "dev"]

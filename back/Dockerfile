@@ -1,18 +1,16 @@
 FROM python:3.12-slim
 
-# Install Sqlite
 RUN apt-get -y update && apt-get -y upgrade && apt-get install -y sqlite3 libsqlite3-dev && apt-get clean
 
 WORKDIR /app
 
-# Create database
-RUN mkdir ./data && /usr/bin/sqlite3 ./data/database.db
+RUN mkdir ./data && sqlite3 ./data/database.db
 
-COPY ./back/requirements.txt /app
+COPY requirements.txt /app
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY ./back /app
+COPY . /app
 
 EXPOSE 80
 

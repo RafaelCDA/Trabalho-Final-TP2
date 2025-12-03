@@ -1,12 +1,4 @@
-"""
-Serviço responsável pela aplicação das regras de negócio relacionadas à entidade Banca.
-
-A camada de serviços atua como intermediária entre os repositórios (persistência)
-e os endpoints, garantindo integridade dos dados e implementando regras de negócio.
-"""
-
 from typing import List, Optional
-
 
 from src.repositories.banca_repository import BancaRepository
 from src.repositories.address_repository import AddressRepository
@@ -16,30 +8,19 @@ from src.dto.banca_dto import (
     BancaRead,
     BancaUpdate,
 )
+from src.dto.address_dto import AddressRead # Importante para conversão
 
 from src.models.banca import Banca
 from src.models.address import Address
 
 
 class BancaService:
-    """
-    Serviço intermediário para gerenciamento de bancas.
-
-    Regras principais:
-    - Uma banca deve possuir um fornecedor (supplier_id).
-    - Uma banca deve possuir um endereço próprio (gerado automaticamente a partir do DTO).
-    """
-
     def __init__(self, banca_repo: BancaRepository, address_repo: AddressRepository):
         self.banca_repo = banca_repo
         self.address_repo = address_repo
 
     # CREATE
     def create_banca(self, dto: BancaCreate) -> BancaRead:
-        """
-        Cria uma banca e seu endereço associado.
-        """
-
         # 1. Criar endereço
         address: Address = self.address_repo.create_address(**dto.address.dict())
 
@@ -52,6 +33,7 @@ class BancaService:
             horario_funcionamento=dto.horario_funcionamento,
         )
 
+        # Retorna com o endereço recém-criado
         return BancaRead(
             id=banca.id,
             nome=banca.nome,
@@ -59,6 +41,7 @@ class BancaService:
             horario_funcionamento=banca.horario_funcionamento,
             supplier_id=banca.supplier_id,
             address_id=banca.address_id,
+            address=AddressRead.model_validate(address), # Preenche o objeto AddressRead
             created_at=banca.created_at,
             updated_at=banca.updated_at,
         )
@@ -69,34 +52,14 @@ class BancaService:
         if not banca:
             return None
 
-        return BancaRead(
-            id=banca.id,
-            nome=banca.nome,
-            descricao=banca.descricao,
-            horario_funcionamento=banca.horario_funcionamento,
-            supplier_id=banca.supplier_id,
-            address_id=banca.address_id,
-            created_at=banca.created_at,
-            updated_at=banca.updated_at,
-        )
+        # O SQLAlchemy carrega banca.address automaticamente
+        return BancaRead.model_validate(banca)
 
     # LIST
     def list_bancas(self) -> List[BancaRead]:
         bancas = self.banca_repo.get_all()
-
-        return [
-            BancaRead(
-                id=b.id,
-                nome=b.nome,
-                descricao=b.descricao,
-                horario_funcionamento=b.horario_funcionamento,
-                supplier_id=b.supplier_id,
-                address_id=b.address_id,
-                created_at=b.created_at,
-                updated_at=b.updated_at,
-            )
-            for b in bancas
-        ]
+        # Converte a lista de models para lista de DTOs (incluindo endereços)
+        return [BancaRead.model_validate(b) for b in bancas]
 
     # UPDATE
     def update_banca(self, banca_id: int, dto: BancaUpdate) -> Optional[BancaRead]:
@@ -106,20 +69,10 @@ class BancaService:
 
         updated = self.banca_repo.update_banca(banca_id, **dto.dict(exclude_none=True))
 
-        # 🔥 CORREÇÃO PARA O PYRIGHT
         if updated is None:
             return None
 
-        return BancaRead(
-            id=updated.id,
-            nome=updated.nome,
-            descricao=updated.descricao,
-            horario_funcionamento=updated.horario_funcionamento,
-            supplier_id=updated.supplier_id,
-            address_id=updated.address_id,
-            created_at=updated.created_at,
-            updated_at=updated.updated_at,
-        )
+        return BancaRead.model_validate(updated)
 
     # DELETE
     def delete_banca(self, banca_id: int) -> bool:
