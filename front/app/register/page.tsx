@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -11,22 +12,39 @@ export default function RegisterForm() {
     email: "",
     senha: "",
     confirmarSenha: "",
+    tipo: "user", // 'user' ou 'supplier'
   });
+
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.senha !== form.confirmarSenha) {
-      alert("As senhas não coincidem!");
+      setError("As senhas não coincidem!");
       return;
     }
 
-    // Enviar dados para API, Firebase, etc.
-    console.log("Criando usuário:", form);
+    const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + "/users/", 
+      {
+        "name": form.nome,
+        "email": form.email,
+        "password": form.senha,
+        "type": form.tipo
+      }
+    ).then((r) => {
+      alert("Conta criada com sucesso! Faça login para continuar.");
+      router.push("/login");
+    }).catch(e =>  {
+      if (e.status !== 500){
+        alert("Erro ao criar conta: " + e.response.data.detail);
+      }
+    });
+
   };
 
   return (
@@ -98,6 +116,45 @@ export default function RegisterForm() {
             placeholder="********"
           />
         </div>
+
+        <div>
+          <span className="block text-sm font-medium text-gray-700 mb-2">
+            Tipo de Conta
+          </span>
+          <div className="flex items-center gap-4">
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="radio"
+                name="tipo"
+                value="user"
+                checked={form.tipo === "user"}
+                onChange={handleChange}
+                className="h-4 w-4 text-green-600"
+              />
+              <span>Usuário</span>
+            </label>
+
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="radio"
+                name="tipo"
+                value="supplier"
+                checked={form.tipo === "supplier"}
+                onChange={handleChange}
+                className="h-4 w-4 text-green-600"
+              />
+              <span>Fornecedor</span>
+            </label>
+          </div>
+        </div>
+
+        {error ? (
+          <div className="flex items-center">
+            <p className="text-red-400 font-bold text-lg">
+              {error}
+            </p>
+          </div>
+        ):(<></>)}
 
         <button
           type="submit"

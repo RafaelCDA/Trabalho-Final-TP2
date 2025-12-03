@@ -23,7 +23,7 @@ export default function Login() {
     ).then((r) => {
       const user = {
         id: r.data.id,
-        name: r.data.email,
+        name: r.data.name,
         email: r.data.email,
         type: r.data.type
       };

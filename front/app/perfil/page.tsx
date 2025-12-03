@@ -21,8 +21,9 @@ export default function Perfil() {
 
   async function fetchUserData() {
     try {
-      const response = await axios.get(process.env.API_URL + "/user/1");
-      setUserData(response.data);
+      const data = sessionStorage.getItem("user");
+      console.log(data);
+      setUserData(JSON.parse(data) || null);
     } catch (error) {
       console.error("Erro ao buscar fornecedores:", error);
     }

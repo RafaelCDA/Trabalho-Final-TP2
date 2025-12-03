@@ -2,13 +2,15 @@
 import { Heart, Search, ShoppingBag } from "lucide-react";
 import {anton} from '@/app/fonts';
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
 export default function Header() {
 
     const pathname = usePathname(); // rota atual
+    const router = useRouter();
+
 
     const links = [
         { name: "Home", href: "/" },
@@ -49,6 +51,8 @@ export default function Header() {
     function logout() {
         sessionStorage.removeItem("user");
         setUser(null);
+        
+        router.push("/");
     }
     
     return (
