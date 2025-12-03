@@ -1,9 +1,11 @@
 """
-Repositório de Endereços
+## Repositório: Address
 
-Centraliza as operações de acesso e manipulação da entidade Address na base
-de dados, servindo como intermediário entre o modelo ORM e a camada de
-serviços.
+Centraliza as operações de acesso e manipulação da entidade Address
+na base de dados, funcionando como a camada responsável por interagir
+diretamente com o ORM.
+Implementa métodos padronizados de criação, consulta, atualização
+e remoção.
 """
 
 from typing import Optional, Sequence
@@ -20,13 +22,15 @@ class AddressRepository:
     Parâmetros
     ----------
     db : Session
-        Sessão ativa utilizada para operações de persistência.
+        Sessão ativa do SQLAlchemy utilizada para persistência de dados.
     """
 
     def __init__(self, db: Session):
         self.db = db
 
+    # ------------------------------------------------------------
     # CREATE
+    # ------------------------------------------------------------
     def create_address(
         self,
         street: str,
@@ -47,11 +51,11 @@ class AddressRepository:
         street : str
             Logradouro.
         city : str
-            Cidade.
+            Cidade do endereço.
         state : str
             Unidade federativa.
         zip_code : str
-            CEP.
+            Código postal (CEP).
         number : str | None
             Número do imóvel.
         complement : str | None
@@ -59,15 +63,16 @@ class AddressRepository:
         district : str | None
             Bairro.
         latitude : float | None
-            Latitude geográfica.
+            Coordenada de latitude.
         longitude : float | None
-            Longitude geográfica.
+            Coordenada de longitude.
 
         Retorno
         -------
         Address
-            Instância persistida com identificador gerado.
+            Instância persistida com ID e metadados preenchidos.
         """
+
         address = Address(
             street=street,
             number=number,
@@ -85,7 +90,9 @@ class AddressRepository:
         self.db.refresh(address)
         return address
 
+    # ------------------------------------------------------------
     # READ
+    # ------------------------------------------------------------
     def get_by_id(self, address_id: str) -> Optional[Address]:
         """
         Consulta um endereço pelo identificador.
@@ -93,12 +100,12 @@ class AddressRepository:
         Parâmetros
         ----------
         address_id : str
-            Identificador único.
+            Identificador único do endereço (UUID).
 
         Retorno
         -------
-        Address ou None
-            Registro encontrado ou None.
+        Address | None
+            O registro encontrado ou None caso não exista.
         """
         return self.db.query(Address).filter_by(id=address_id).first()
 
@@ -109,26 +116,29 @@ class AddressRepository:
         Retorno
         -------
         Sequence[Address]
-            Lista com todos os registros persistidos.
+            Lista contendo todas as instâncias persistidas.
         """
         return self.db.query(Address).all()
 
+    # ------------------------------------------------------------
     # UPDATE
+    # ------------------------------------------------------------
     def update_address(self, address_id: str, **fields) -> Optional[Address]:
         """
-        Atualiza os campos informados do endereço especificado.
+        Atualiza parcialmente um endereço já cadastrado.
 
         Parâmetros
         ----------
         address_id : str
-            Identificador do endereço.
+            Identificador do endereço a ser atualizado.
         fields : dict
-            Campos a serem atualizados.
+            Campos que devem ser modificados. Somente valores não nulos
+            serão aplicados.
 
         Retorno
         -------
-        Address ou None
-            Instância atualizada ou None se o registro não existir.
+        Address | None
+            Instância atualizada ou None caso o endereço não seja encontrado.
         """
         address = self.get_by_id(address_id)
         if not address:
@@ -144,20 +154,22 @@ class AddressRepository:
         self.db.refresh(address)
         return address
 
+    # ------------------------------------------------------------
     # DELETE
+    # ------------------------------------------------------------
     def delete_address(self, address_id: str) -> None:
         """
-        Remove o endereço correspondente ao identificador.
+        Remove permanentemente um endereço pelo seu ID.
 
         Parâmetros
         ----------
         address_id : str
-            Identificador do endereço.
+            Identificador do endereço a ser removido.
 
         Retorno
         -------
         None
-            Não há retorno.
+            Não há retorno. Se o endereço não existir, nenhuma ação é tomada.
         """
         address = self.get_by_id(address_id)
         if not address:

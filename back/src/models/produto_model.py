@@ -1,9 +1,13 @@
 """
-Modelo ORM da entidade Produto.
+## Modelo ORM: Produto
 
-Representa os produtos vendidos em uma banca. Cada produto pertence a uma banca,
-mantendo vínculo via chave estrangeira. Armazena dados essenciais como nome,
-preço e imagem, além dos registros automáticos de criação e atualização.
+Representa os produtos cadastrados em uma banca.
+Cada item mantém vínculo direto com a entidade **Banca** e registra
+informações essenciais como nome, preço e imagem, além dos dados
+automáticos de criação e atualização.
+
+Utiliza SQLAlchemy ORM para mapear a tabela `produtos`, permitindo
+operações de consulta e persistência pelas camadas de repositório e serviço.
 """
 
 from datetime import datetime, timezone
@@ -16,6 +20,14 @@ from src.core.database import Base
 
 
 class Produto(Base):
+    """
+    Modelo ORM da entidade **Produto**.
+
+    - Associa cada produto a uma banca específica.
+    - Armazena dados comerciais como nome, preço e imagem.
+    - Mantém controle automático de criação e atualização.
+    """
+
     __tablename__ = "produtos"
 
     id: Mapped[int] = mapped_column(
@@ -44,6 +56,17 @@ class Produto(Base):
         preco: float,
         imagem: Optional[str] = None,
     ):
+        """
+        Inicializa uma nova instância de Produto.
+
+        Parâmetros:
+        - `banca_id`: Identificador da banca proprietária do produto.
+        - `nome`: Nome comercial do item.
+        - `preco`: Valor do produto.
+        - `imagem`: Caminho ou URL da imagem ilustrativa (opcional).
+
+        Define automaticamente `created_at` e `updated_at` no padrão ISO 8601 (UTC).
+        """
         now = datetime.now(timezone.utc).isoformat()
 
         self.banca_id = banca_id

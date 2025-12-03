@@ -1,13 +1,12 @@
 """
-Modelo ORM da entidade Banca.
+## Modelo ORM: Banca
 
-Representa as bancas cadastradas pelos fornecedores dentro da feira.
-Este modelo define os atributos essenciais, como nome, localização,
-descrição e horário de funcionamento, além de informações automáticas
-de criação e atualização.
+Representa as bancas cadastradas pelos fornecedores na feira.
+Define atributos essenciais como nome, localização, descrição e horário de funcionamento.
+Gerencia informações automáticas de criação e atualização.
 
-Utiliza SQLAlchemy ORM para mapear a estrutura da tabela e permitir
-operações CRUD via repositórios e serviços.
+Utiliza SQLAlchemy ORM para mapear a tabela `bancas` e permitir operações CRUD
+via camadas de repositório e serviço.
 """
 
 from datetime import datetime, timezone
@@ -20,6 +19,14 @@ from src.core.database import Base
 
 
 class Banca(Base):
+    """
+    Modelo ORM da entidade **Banca**.
+
+    - Identifica uma banca pertencente a um fornecedor.
+    - Associa a banca a um endereço registrado.
+    - Mantém metadados de criação e atualização.
+    """
+
     __tablename__ = "bancas"
 
     id: Mapped[int] = mapped_column(
@@ -41,17 +48,13 @@ class Banca(Base):
     created_at: Mapped[str] = mapped_column(String, nullable=False)
     updated_at: Mapped[str] = mapped_column(String, nullable=False)
 
-    # ============================================================
-    # RELACIONAMENTOS
-    # ============================================================
+    # -----------------------------
+    # Relacionamentos
+    # -----------------------------
 
-    # Banca → Address
     address = relationship("Address", back_populates="bancas")
-
-    # Banca → Supplier (usuário do tipo supplier)
     supplier = relationship("User")
 
-    # Banca → Produtos
     produtos = relationship(
         "Produto",
         back_populates="banca",
@@ -67,24 +70,16 @@ class Banca(Base):
         horario_funcionamento: Optional[str] = None,
     ):
         """
-        Inicializa a entidade Banca.
+        Inicializa uma nova instância de Banca.
 
-        Parâmetros
-        ----------
-        supplier_id : str
-            ID do fornecedor responsável.
-        address_id : str
-            ID do endereço associado à banca.
-        nome : str
-            Nome da banca.
-        descricao : str | None
-            Informações adicionais.
-        horario_funcionamento : str | None
-            Horários de abertura e fechamento.
+        Parâmetros:
+        - `supplier_id`: ID do fornecedor responsável.
+        - `address_id`: ID do endereço associado.
+        - `nome`: Nome comercial da banca.
+        - `descricao`: Informações adicionais.
+        - `horario_funcionamento`: Horários de operação.
 
-        Retorno
-        -------
-        None
+        Define automaticamente `created_at` e `updated_at`.
         """
         now = datetime.now(timezone.utc).isoformat()
 

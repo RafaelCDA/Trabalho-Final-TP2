@@ -1,3 +1,12 @@
+"""
+## DTOs: Pesquisa
+
+Define os modelos utilizados para registrar pesquisas realizadas pelos usuários
+e estruturar o retorno das buscas.
+Os DTOs padronizam a validação dos dados enviados e recebidos pelas rotas,
+permitindo consistência entre serviços e repositórios.
+"""
+
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -8,9 +17,11 @@ from src.dto.banca_dto import BancaRead
 # ============================================================
 # BASE
 # ============================================================
-
-
 class PesquisaBase(BaseModel):
+    """
+    Campos fundamentais de uma pesquisa realizada pelo usuário.
+    """
+
     termo: str = Field(..., description="Texto pesquisado pelo usuário")
     latitude: Optional[float] = Field(
         None, description="Latitude do usuário no momento da pesquisa"
@@ -23,22 +34,23 @@ class PesquisaBase(BaseModel):
 # ============================================================
 # CREATE
 # ============================================================
-
-
 class PesquisaCreate(PesquisaBase):
     """
-    DTO utilizado para registrar uma nova pesquisa feita pelo usuário.
+    Estrutura utilizada para registrar uma nova pesquisa.
     """
 
     pass
 
 
 # ============================================================
-# READ (RESPONSE DE UMA PESQUISA REGISTRADA)
+# READ
 # ============================================================
-
-
 class PesquisaRead(PesquisaBase):
+    """
+    Dados retornados após o registro de uma pesquisa,
+    incluindo identificador e data/hora.
+    """
+
     id: int
     created_at: str
 
@@ -47,14 +59,12 @@ class PesquisaRead(PesquisaBase):
 
 
 # ============================================================
-# SEARCH RESPONSE (RETORNO DA BUSCA)
+# SEARCH RESPONSE
 # ============================================================
-
-
 class SearchResponse(BaseModel):
     """
-    Resultado da busca.
-    Retorna listas separadas conforme o tipo pesquisado (produtos, bancas).
+    Resultado consolidado de uma busca.
+    Retorna listas de produtos e bancas relacionados ao termo pesquisado.
     """
 
     query: str = Field(..., description="Termo pesquisado")
