@@ -1,8 +1,10 @@
 """
-Repositório de Pesquisas
+## Repositório: Pesquisa
 
-Responsável por registrar e consultar pesquisas realizadas pelos usuários.
-Serve como ponte entre o modelo Pesquisa e a camada de serviços.
+Centraliza as operações de persistência relacionadas às pesquisas realizadas
+pelos usuários.
+Funciona como camada intermediária entre o modelo ORM `Pesquisa` e os serviços,
+permitindo registrar pesquisas e consultar registros previamente feitos.
 """
 
 from typing import Optional, Sequence, List
@@ -13,7 +15,12 @@ from src.models.pesquisa import Pesquisa
 
 class PesquisaRepository:
     """
-    Encapsula as operações relacionadas à entidade Pesquisa.
+    Encapsula as operações CRUD e consultas específicas da entidade Pesquisa.
+
+    Parâmetros
+    ----------
+    db : Session
+        Sessão ativa do SQLAlchemy utilizada para operações de banco de dados.
     """
 
     def __init__(self, db: Session):
@@ -30,7 +37,22 @@ class PesquisaRepository:
     ) -> Pesquisa:
         """
         Registra uma nova pesquisa no banco de dados.
+
+        Parâmetros
+        ----------
+        termo : str
+            Termo digitado pelo usuário durante a busca.
+        latitude : float | None
+            Latitude no momento da pesquisa (opcional).
+        longitude : float | None
+            Longitude no momento da pesquisa (opcional).
+
+        Retorno
+        -------
+        Pesquisa
+            Instância persistida contendo ID e timestamp gerados.
         """
+
         pesquisa = Pesquisa(
             termo=termo,
             latitude=latitude,
@@ -48,6 +70,11 @@ class PesquisaRepository:
     def listar_todas(self) -> Sequence[Pesquisa]:
         """
         Retorna todas as pesquisas registradas.
+
+        Retorno
+        -------
+        Sequence[Pesquisa]
+            Lista completa de registros persistidos.
         """
         return self.db.query(Pesquisa).all()
 
@@ -56,9 +83,30 @@ class PesquisaRepository:
     # ============================================================
     def get_by_id(self, pesquisa_id: int) -> Optional[Pesquisa]:
         """
-        Retorna uma pesquisa específica pelo ID.
+        Consulta uma pesquisa específica pelo ID.
+
+        Parâmetros
+        ----------
+        pesquisa_id : int
+            Identificador único da pesquisa.
+
+        Retorno
+        -------
+        Pesquisa | None
+            Instância encontrada ou None caso não exista.
         """
         return self.db.query(Pesquisa).filter_by(id=pesquisa_id).first()
 
+    # ============================================================
+    # ALIAS (DUPLICADO)
+    # ============================================================
     def get_all(self) -> List[Pesquisa]:
+        """
+        Alias de listar_todas() mantido por compatibilidade.
+
+        Retorno
+        -------
+        List[Pesquisa]
+            Lista com todas as pesquisas registradas.
+        """
         return self.db.query(Pesquisa).all()

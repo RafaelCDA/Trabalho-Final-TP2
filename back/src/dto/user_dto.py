@@ -1,34 +1,23 @@
 """
-Data Transfer Objects (DTOs) relacionados à entidade User.
+## DTOs: User
 
-Os DTOs padronizam a entrada e saída de dados na camada de API,
-garantindo validações consistentes e evitando exposição direta dos
-modelos ORM.
+Define as estruturas utilizadas na criação, atualização, resposta e
+autenticação de usuários.
+Os DTOs garantem validações consistentes e evitam exposição direta dos
+modelos ORM, padronizando a troca de dados entre APIs, serviços e
+repositórios.
 """
 
 from typing import Optional, Literal
 from pydantic import BaseModel, EmailStr
 
 
+# ============================================================
+# CREATE
+# ============================================================
 class UserCreateDTO(BaseModel):
     """
-    Estrutura utilizada para criação de usuários.
-
-    Parâmetros
-    ----------
-    name : str
-        Nome completo do usuário.
-    email : EmailStr
-        Endereço de e-mail válido.
-    password : str
-        Senha enviada para criação da conta.
-    type : Literal["user", "admin", "supplier"]
-        Tipo do usuário (ex.: "user", "admin", "supplier").
-
-    Retorno
-    -------
-    UserCreateDTO
-        Instância validada contendo os dados fornecidos para criação.
+    Estrutura utilizada para cadastrar um novo usuário.
     """
 
     name: str
@@ -37,25 +26,13 @@ class UserCreateDTO(BaseModel):
     type: Literal["user", "admin", "supplier"]
 
 
+# ============================================================
+# UPDATE
+# ============================================================
 class UserUpdateDTO(BaseModel):
     """
     Estrutura utilizada para atualização parcial dos dados de um usuário.
-
-    Parâmetros
-    ----------
-    name : str | None
-        Nome atualizado, quando informado.
-    email : EmailStr | None
-        E-mail atualizado, quando informado.
-    password : str | None
-        Senha atualizada, quando informada.
-    type : Literal["user", "admin", "supplier"] | None
-        Tipo atualizado, quando informado.
-
-    Observações
-    -----------
-    Todos os campos são opcionais para permitir atualizações parciais,
-    seguindo o formato de PATCH.
+    Todos os campos são opcionais, permitindo requisições do tipo PATCH.
     """
 
     name: Optional[str] = None
@@ -64,28 +41,13 @@ class UserUpdateDTO(BaseModel):
     type: Optional[Literal["user", "admin", "supplier"]] = None
 
 
+# ============================================================
+# READ / RESPONSE
+# ============================================================
 class UserResponseDTO(BaseModel):
     """
-    Estrutura retornada pela API ao expor informações de um usuário.
-
-    Parâmetros
-    ----------
-    id : str
-        Identificador único do usuário.
-    name : str
-        Nome completo.
-    email : EmailStr
-        Endereço de e-mail cadastrado.
-    type : str
-        Tipo do usuário (perfil de acesso).
-    created_at : str
-        Data de criação do registro.
-    updated_at : str
-        Data da última modificação.
-
-    Observações
-    -----------
-    A senha nunca é retornada neste DTO.
+    Estrutura retornada pela API contendo as informações públicas de um usuário.
+    A senha nunca é exposta neste DTO.
     """
 
     id: str
@@ -96,21 +58,12 @@ class UserResponseDTO(BaseModel):
     updated_at: str
 
 
+# ============================================================
+# LOGIN
+# ============================================================
 class LoginDTO(BaseModel):
     """
     Estrutura utilizada no fluxo de autenticação.
-
-    Parâmetros
-    ----------
-    email : EmailStr
-        E-mail cadastrado no sistema.
-    password : str
-        Senha correspondente ao usuário.
-
-    Retorno
-    -------
-    LoginDTO
-        Instância validada para autenticação.
     """
 
     email: EmailStr

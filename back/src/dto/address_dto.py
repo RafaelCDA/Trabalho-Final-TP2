@@ -1,11 +1,24 @@
+"""
+## DTOs: Address
+
+Define os modelos Pydantic utilizados para entrada, atualização
+e retorno de dados relacionados a endereços.
+Esses DTOs padronizam a validação e a estrutura de troca de informações
+entre as camadas de rota, serviço e repositório.
+"""
+
 from typing import Optional
 from pydantic import BaseModel, Field
 
 
 # -----------------------
-# BASE (com campos comuns)
+# BASE (campos comuns)
 # -----------------------
 class AddressBase(BaseModel):
+    """
+    Campos compartilhados entre os DTOs de criação, atualização e leitura.
+    """
+
     street: str = Field(..., description="Logradouro")
     number: Optional[str] = Field(None, description="Número do imóvel")
     complement: Optional[str] = Field(None, description="Complemento")
@@ -22,7 +35,7 @@ class AddressBase(BaseModel):
 # -----------------------
 class AddressCreate(AddressBase):
     """
-    Dados necessários para registrar um endereço no sistema.
+    Estrutura utilizada para cadastrar um novo endereço.
     """
 
     pass
@@ -33,7 +46,7 @@ class AddressCreate(AddressBase):
 # -----------------------
 class AddressUpdate(BaseModel):
     """
-    Campos opcionais que podem ser alterados em um endereço.
+    Campos opcionais para atualização parcial de um endereço.
     """
 
     street: Optional[str] = None
@@ -48,9 +61,14 @@ class AddressUpdate(BaseModel):
 
 
 # -----------------------
-# READ (retorno)
+# READ
 # -----------------------
 class AddressRead(AddressBase):
+    """
+    Estrutura retornada pelas operações de leitura,
+    incluindo metadados de identificação e auditoria.
+    """
+
     id: str
     created_at: str
     updated_at: str

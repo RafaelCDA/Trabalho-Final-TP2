@@ -1,12 +1,17 @@
 """
-Serviço responsável pela aplicação das regras de negócio relacionadas à entidade Banca.
+## Serviço: BancaService
 
-A camada de serviços atua como intermediária entre os repositórios (persistência)
-e os endpoints, garantindo integridade dos dados e implementando regras de negócio.
+Responsável pela aplicação das regras de negócio relacionadas à entidade **Banca**.
+Atua como intermediário entre repositórios e endpoints, garantindo integridade
+dos dados, consistência das operações e isolamento das regras de negócio.
+
+Principais responsabilidades:
+- Validar os dados de criação e atualização de bancas.
+- Criar automaticamente o endereço associado a uma banca.
+- Encapsular lógica de leitura, listagem e exclusão.
 """
 
 from typing import List, Optional
-
 
 from src.repositories.banca_repository import BancaRepository
 from src.repositories.address_repository import AddressRepository
@@ -23,27 +28,50 @@ from src.models.address import Address
 
 class BancaService:
     """
-    Serviço intermediário para gerenciamento de bancas.
+    Serviço de gerenciamento de bancas.
 
-    Regras principais:
-    - Uma banca deve possuir um fornecedor (supplier_id).
-    - Uma banca deve possuir um endereço próprio (gerado automaticamente a partir do DTO).
+    Regras principais
+    -----------------
+    - Toda banca deve possuir um fornecedor válido (`supplier_id`).
+    - Toda banca deve possuir um endereço próprio, criado a partir do DTO recebido.
     """
 
     def __init__(self, banca_repo: BancaRepository, address_repo: AddressRepository):
+        """
+        Inicializa o serviço com os repositórios necessários.
+
+        Parâmetros
+        ----------
+        banca_repo : BancaRepository
+            Repositório responsável pelas operações relacionadas à entidade Banca.
+        address_repo : AddressRepository
+            Repositório utilizado para criação e manipulação de endereços.
+        """
         self.banca_repo = banca_repo
         self.address_repo = address_repo
 
+    # ============================================================
     # CREATE
+    # ============================================================
     def create_banca(self, dto: BancaCreate) -> BancaRead:
         """
-        Cria uma banca e seu endereço associado.
+        Cria uma nova banca e o endereço associado.
+
+        Parâmetros
+        ----------
+        dto : BancaCreate
+            Dados necessários para criar a banca e seu endereço.
+
+        Retorno
+        -------
+        BancaRead
+            DTO contendo os dados completos da banca criada.
         """
 
-        # 1. Criar endereço
+        # 1. Criar endereço associado
         address: Address = self.address_repo.create_address(**dto.address.dict())
 
-        # 2. Criar banca
+        # 2. Criar a banca
         banca: Banca = self.banca_repo.create_banca(
             supplier_id=dto.supplier_id,
             address_id=address.id,
@@ -63,8 +91,23 @@ class BancaService:
             updated_at=banca.updated_at,
         )
 
+    # ============================================================
     # READ
+    # ============================================================
     def get_banca(self, banca_id: int) -> Optional[BancaRead]:
+        """
+        Retorna uma banca específica pelo ID.
+
+        Parâmetros
+        ----------
+        banca_id : int
+            Identificador da banca.
+
+        Retorno
+        -------
+        BancaRead | None
+            DTO da banca encontrada ou None caso não exista.
+        """
         banca = self.banca_repo.get_by_id(banca_id)
         if not banca:
             return None
@@ -80,8 +123,18 @@ class BancaService:
             updated_at=banca.updated_at,
         )
 
+    # ============================================================
     # LIST
+    # ============================================================
     def list_bancas(self) -> List[BancaRead]:
+        """
+        Retorna todas as bancas cadastradas.
+
+        Retorno
+        -------
+        List[BancaRead]
+            Lista de DTOs contendo as bancas registradas.
+        """
         bancas = self.banca_repo.get_all()
 
         return [
@@ -98,15 +151,32 @@ class BancaService:
             for b in bancas
         ]
 
+    # ============================================================
     # UPDATE
+    # ============================================================
     def update_banca(self, banca_id: int, dto: BancaUpdate) -> Optional[BancaRead]:
+        """
+        Atualiza parcialmente uma banca existente.
+
+        Parâmetros
+        ----------
+        banca_id : int
+            Identificador da banca.
+        dto : BancaUpdate
+            Campos que devem ser atualizados.
+
+        Retorno
+        -------
+        BancaRead | None
+            DTO atualizado ou None caso a banca não exista.
+        """
+
         banca = self.banca_repo.get_by_id(banca_id)
         if not banca:
             return None
 
         updated = self.banca_repo.update_banca(banca_id, **dto.dict(exclude_none=True))
 
-        # 🔥 CORREÇÃO PARA O PYRIGHT
         if updated is None:
             return None
 
@@ -121,8 +191,24 @@ class BancaService:
             updated_at=updated.updated_at,
         )
 
+    # ============================================================
     # DELETE
+    # ============================================================
     def delete_banca(self, banca_id: int) -> bool:
+        """
+        Remove uma banca do sistema.
+
+        Parâmetros
+        ----------
+        banca_id : int
+            Identificador da banca a ser removida.
+
+        Retorno
+        -------
+        bool
+            True se a banca foi removida, False caso não exista.
+        """
+
         banca = self.banca_repo.get_by_id(banca_id)
         if not banca:
             return False

@@ -1,7 +1,17 @@
 site_name: Documentação do Sistema de Compras em Feiras
+
 theme:
   name: material
   language: pt-BR
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+    - header.autohide
+    - toc.follow
+    - toc.integrate
 
 plugins:
   - mkdocstrings:
@@ -9,11 +19,28 @@ plugins:
         python:
           options:
             show_source: false
+  - search
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - attr_list
+  - admonition
+  - md_in_html
+  - footnotes
+  - def_list
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 
 nav:
   - Início: index.md
-  - API: api.md
   - Modelos: models.md
   - Repositórios: repositories.md
   - DTOs: dto.md
+  - Serviços: services.md
+  - Endpoints: api.md
   - CORE: core.md

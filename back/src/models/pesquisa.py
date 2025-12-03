@@ -1,9 +1,12 @@
 """
-Modelo ORM da entidade Pesquisa.
+## Modelo ORM: Pesquisa
 
-Registra as pesquisas realizadas pelos usuários, incluindo o termo buscado,
-o horário da pesquisa e, opcionalmente, a localização (latitude/longitude)
-do usuário no momento da busca.
+Registra pesquisas realizadas pelos usuários, incluindo o termo buscado,
+a data/hora da ação e, opcionalmente, a localização (latitude/longitude)
+no momento da consulta.
+
+Utiliza SQLAlchemy ORM para mapear a tabela `pesquisas` e permitir
+operações de registro e consulta pela camada de serviço.
 """
 
 from datetime import datetime, timezone
@@ -16,6 +19,13 @@ from src.core.database import Base
 
 
 class Pesquisa(Base):
+    """
+    Modelo ORM da entidade **Pesquisa**.
+
+    - Armazena o termo pesquisado pelo usuário.
+    - Registra metadados da busca, incluindo horário (UTC) e localização opcional.
+    """
+
     __tablename__ = "pesquisas"
 
     id: Mapped[int] = mapped_column(
@@ -25,14 +35,11 @@ class Pesquisa(Base):
         autoincrement=True,
     )
 
-    # termo pesquisado, ex.: "tomate"
     termo: Mapped[str] = mapped_column(String, nullable=False)
 
-    # localização aproximada do usuário (opcional)
     latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
-    # momento da pesquisa em ISO 8601 (UTC)
     created_at: Mapped[str] = mapped_column(String, nullable=False)
 
     def __init__(
@@ -42,16 +49,14 @@ class Pesquisa(Base):
         longitude: Optional[float] = None,
     ):
         """
-        Inicializa uma nova pesquisa.
+        Inicializa uma nova instância de Pesquisa.
 
-        Parâmetros
-        ----------
-        termo : str
-            Texto pesquisado pelo usuário (ex.: "tomate").
-        latitude : float | None
-            Latitude do usuário no momento da pesquisa.
-        longitude : float | None
-            Longitude do usuário no momento da pesquisa.
+        Parâmetros:
+        - `termo`: Texto pesquisado pelo usuário.
+        - `latitude`: Localização latitude no momento da pesquisa (opcional).
+        - `longitude`: Localização longitude no momento da pesquisa (opcional).
+
+        Define automaticamente o campo `created_at` no padrão ISO 8601 (UTC).
         """
         now = datetime.now(timezone.utc).isoformat()
 
