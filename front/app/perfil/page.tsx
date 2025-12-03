@@ -34,11 +34,23 @@ export default function Perfil() {
   }, []);
 
 
-  const handleEmailChange = (e) => {
+  const handleEmailChange = async (e) => {
     e.preventDefault();
     if (newEmail.trim() === "") return;
-    setUserData({ ...userData, email: newEmail });
-    setNewEmail("");
+    const response = await axios.put(process.env.NEXT_PUBLIC_API_URL + `/users/${userData.id}`, 
+      {
+        "email": newEmail
+      }
+    ).then((r) => {
+      alert("Email alterado com sucesso!");
+      sessionStorage.setItem("user", JSON.stringify({...userData, email: newEmail}));
+      setUserData({ ...userData, email: newEmail });
+      setNewEmail("");
+    }).catch(e =>  {
+      if (e.status !== 500){
+        alert("Erro ao alterar email: " + e.response.data.detail);
+      }
+    });
   };
 
   const handlePasswordChange = (e) => {
@@ -124,62 +136,5 @@ export default function Perfil() {
         </button>
       </form>
     </main>
-    // <main className="max-w-7xl mx-auto px-6 py-6">
-    //
-    //   <h2 className="text-3xl font-bold text-[var(--color-shop_dark_green)] mb-6">
-    //     Lista de Fornecedores
-    //   </h2>
-    //
-    //   <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    //     {fornecedores.map((f: any, i: number) => (
-    //       <div key={i} className="border p-4 rounded-xl shadow-sm hover:shadow-md transition">
-    //
-    //         <h3 className="text-lg font-semibold">{f.nome}</h3>
-    //         <p className="text-gray-600">{f.cidade}</p>
-    //
-    //         {/* Descrição truncada com ... e quebrando palavras longas */}
-    //         <p
-    //           className="text-gray-500 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis break-all"
-    //           style={{ width: "100%" }}
-    //         >
-    //           {f.descricao}
-    //         </p>
-    //
-    //         <button
-    //           onClick={() => setSelected(f)}
-    //           className="mt-3 bg-[var(--color-shop_light_green)] text-white px-4 py-2 rounded-lg hover:opacity-90"
-    //         >
-    //           Ver detalhes
-    //         </button>
-    //
-    //       </div>
-    //     ))}
-    //   </section>
-    //
-    //   {/* Modal com fundo blur + descrição completa */}
-    //   {selected && (
-    //     <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center">
-    //       <div className="bg-white p-6 rounded-xl w-80 shadow-xl">
-    //
-    //         <h3 className="text-xl font-bold">{selected.nome}</h3>
-    //         <p className="text-gray-700 mt-2">{selected.cidade}</p>
-    //
-    //         {/* Aqui mostra a descrição INTEIRA */}
-    //         <p className="text-gray-500 mt-2 whitespace-normal">
-    //           {selected.descricao}
-    //         </p>
-    //
-    //         <button
-    //           onClick={() => setSelected(null)}
-    //           className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg w-full"
-    //         >
-    //           Fechar
-    //         </button>
-    //
-    //       </div>
-    //     </div>
-    //   )}
-    //
-    // </main>
   );
 }
