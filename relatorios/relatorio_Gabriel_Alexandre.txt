@@ -1,0 +1,35 @@
+RELATÓRIO INDIVIDUAL - Gabriel Alexandre Gomes
+MATRÍCULA: 241038942
+
+ATIVIDADES DESENVOLVIDAS:
+📅 27/11 | 3h | codificar módulo | HU-01: Implementação serviço busca produtos (TDD)
+📅 27/11 | 1h12 | redigir casos teste | HU-01/HU-02: Criação de 4 testes unitários
+📅 27/11 | 45min | documentar | Docstrings e comentários Doxygen
+📅 27/11 | 2h | codificar módulo | HU-02: Sistema de ordenação e relatórios
+📅 27/11 | 1h | realizar testes | Execução e validação testes (4/4 passando)
+📅 27/11 | 30min | revisar código | Correções finais e ajustes
+
+FUNCIONALIDADES IMPLEMENTADAS:
+✅ HU-01: Busca produtos por nome e nome da banca
+✅ HU-02: Ordenação por preço e localização  
+✅ Relatórios: Estatísticas de pesquisas para administrador
+✅ Integração: Com estrutura existente do projeto
+
+TECNOLOGIAS UTILIZADAS:
+- Python 3.12
+- FastAPI
+- Pytest
+- Pydantic
+- TDD (Test-Driven Development)
+
+RESULTADOS:
+- 4 testes unitários (100% passando)
+- Código documentado seguindo padrões
+- Funcionalidades validadas individualmente
+- Processo TDD aplicado corretamente
+
+OBSERVAÇÕES:
+- Todas funcionalidades testadas e funcionais
+- Problemas de integração na API são de configuração do projeto
+- Código pronto para integração com frontend
+
