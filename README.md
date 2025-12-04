@@ -7,7 +7,7 @@
 - Rafael Cutrim
 - Sávio Henrique
 - Gabriel
-- Guilherme
+- Guilherme Gomes Santa Rosa
 - Henrique
 
 ## Tecnologias:
