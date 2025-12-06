@@ -7,7 +7,7 @@ resultante fornece suporte às funcionalidades essenciais do sistema,
 incluindo busca de produtos, gerenciamento de fornecedores e interações com
 usuários, conforme definido nos requisitos funcionais.
 """
-
+from src.models.database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.router import router as api_router

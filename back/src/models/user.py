@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+from sqlalchemy import Column, Integer, String, Boolean
+from .database import Base
+=======
 """
 Modelo ORM responsável pelo mapeamento da tabela de usuários.
 
@@ -12,10 +16,17 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Enum
 from src.core.database import Base
 
+>>>>>>> develop
 
 class User(Base):
     __tablename__ = "users"
 
+<<<<<<< HEAD
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    is_vendor = Column(Boolean, default=False)
+=======
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
@@ -55,3 +66,4 @@ class User(Base):
         self.type = type
         self.created_at = now
         self.updated_at = now
+>>>>>>> develop
